@@ -57,7 +57,7 @@ public class TheFacebook extends SocialNetwork {
 		SocialNetwork.logTag = "Corso12 - Social - Facebook";
 		
 		// restoring an eventual saved session
-		SocialSessionStore.restore(SocialWrapper.FACEBOOK, this, context);
+		SocialSessionStore.restore(SocialWrapper.FACEBOOK, context);
 	}
 
 	@Override

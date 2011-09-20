@@ -37,8 +37,7 @@ public class SocialSessionStore {
     }
 
     @SuppressWarnings("unchecked")
-	public static HashMap<String, String> restore(String socialKey,
-    		SocialNetwork session, Context context) {
+	public static HashMap<String, String> restore(String socialKey, Context context) {
         
     	SharedPreferences savedSession =
             context.getSharedPreferences(socialKey, Context.MODE_PRIVATE);

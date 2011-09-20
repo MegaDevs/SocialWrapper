@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="com.megadevs.socialwrapper"
-      android:versionCode="1"
-      android:versionName="1.0">
+	package="com.megadevs.socialwrapper" android:versionCode="1"
+	android:versionName="1.0">
 
-    <uses-sdk android:minSdkVersion="8" />
+	<uses-sdk android:minSdkVersion="8" />
+	<application>
+		<activity android:name=".thetwitter.TheTwitterWebView"
+			android:launchMode="singleInstance">
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.BROWSABLE" />
+				<data android:scheme="T4JOAuth" android:host="main" />
+			</intent-filter>
+		</activity>
+	</application>
 
-	<application/>
-
+	<uses-permission android:name="android.permission.INTERNET" />
 </manifest>
