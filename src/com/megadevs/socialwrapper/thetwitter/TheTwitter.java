@@ -1,9 +1,6 @@
 package com.megadevs.socialwrapper.thetwitter;
 
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Random;
 import java.util.Vector;
 
 import twitter4j.IDs;
@@ -16,17 +13,9 @@ import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.Toast;
 
-import com.megadevs.socialwrapper.R;
 import com.megadevs.socialwrapper.SocialFriend;
 import com.megadevs.socialwrapper.SocialNetwork;
 import com.megadevs.socialwrapper.SocialSessionStore;
@@ -204,10 +193,5 @@ public class TheTwitter extends SocialNetwork {
 		connList.add(new String[] {accessTokenKey, connectionData.get(accessTokenKey)});
 		connList.add(new String[] {accessTokenSecretKey, connectionData.get(accessTokenSecretKey)});
 		return connList;
-	}
-
-	@Override
-	public void setConnectionData(HashMap<String, String> data) {
-		connectionData = data;
 	}
 }

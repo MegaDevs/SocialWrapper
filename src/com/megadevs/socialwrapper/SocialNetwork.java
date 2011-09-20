@@ -1,7 +1,6 @@
 package com.megadevs.socialwrapper;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
@@ -29,14 +28,13 @@ public abstract class SocialNetwork {
 	public abstract ArrayList<SocialFriend> getFriendsList();
 	public abstract ArrayList<String> getFriendsUsingCorso12();
 
-	public void setConnectionParams(Map<String, String> connectionData) {
+	protected void setConnectionData(Map<String, String> connectionData) {
 		this.connectionData = connectionData;
 	}
 
-	public abstract Vector<String[]> getConnectionData();
-	public abstract void setConnectionData(HashMap<String, String> data);
-
-	public boolean isConnected() {
+	protected abstract Vector<String[]> getConnectionData();
+	
+	protected boolean isConnected() {
 		return this.connected;
 	}
 }

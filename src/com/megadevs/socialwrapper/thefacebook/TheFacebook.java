@@ -86,11 +86,6 @@ public class TheFacebook extends SocialNetwork {
 	}
 	
 	@Override
-	public void setConnectionData(HashMap<String, String> data) {
-		connectionData = data;
-	}
-	
-	@Override
 	public String postToFriend(String friendID, String msg) {
         Bundle parameters = new Bundle();
         parameters.putString("to", friendID);
