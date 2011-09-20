@@ -74,8 +74,8 @@ public class TheTwitter extends SocialNetwork {
 	private void removeAccessToken() {
 		connectionData.remove(accessTokenKey);
 		connectionData.remove(accessTokenSecretKey);
-		SocialSessionStore.clear(accessTokenKey, mActivity);
-		SocialSessionStore.clear(accessTokenSecretKey, mActivity);
+
+		SocialSessionStore.clear(SocialWrapper.TWITTER, mActivity);
 	}
 
 	private Boolean checkIstanceTwitter() {

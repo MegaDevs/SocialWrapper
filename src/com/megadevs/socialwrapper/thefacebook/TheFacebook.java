@@ -30,10 +30,10 @@ public class TheFacebook extends SocialNetwork {
 	private ArrayList<SocialFriend> mFacebookFriends;
 	
 	private Activity mActivity;
-	private String appID = "210912465637288";
+	private final String appID = "210912465637288";
 	
-	private String appIDKey = "app_id";
-	private String accessTokenKey = "access_token";
+	private final String appIDKey = "app_id";
+	private final String accessTokenKey = "access_token";
 
 	/**
 	 * Default constructor for TheFacebook class. A context is
