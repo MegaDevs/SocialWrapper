@@ -6,6 +6,7 @@ import java.util.Map;
 import android.app.Activity;
 
 import com.megadevs.socialwrapper.thefacebook.TheFacebook;
+import com.megadevs.socialwrapper.thetwitter.TheTwitter;
 
 public class SocialWrapper {
 	
@@ -59,7 +60,11 @@ public class SocialWrapper {
 				socialNetworks.put(FACEBOOK, f);
 				return f;
 			}
-			//TODO ADD NEW SOCIAL NETWORKS!!! ---------------------------
+			if (id.equals(TWITTER)) {
+				TheTwitter t = new TheTwitter(mActivity);
+				socialNetworks.put(TWITTER, t);
+				return t;
+			}
 			return null;
 		}
 		else
