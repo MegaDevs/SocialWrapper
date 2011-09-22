@@ -9,7 +9,7 @@ import android.content.Context;
 public abstract class SocialNetwork {
 	
 	protected Map<String, String> connectionData;
-	protected boolean connected;
+//	protected boolean connected;
 	protected Context context;
 	protected String actionResult;
 	
@@ -28,13 +28,10 @@ public abstract class SocialNetwork {
 	public abstract ArrayList<SocialFriend> getFriendsList();
 	public abstract ArrayList<String> getFriendsUsingCorso12();
 
-	protected void setConnectionData(Map<String, String> connectionData) {
-		this.connectionData = connectionData;
-	}
-
 	protected abstract Vector<String[]> getConnectionData();
+	protected abstract void setConnectionData(Map<String, String> connectionData);
 	
-	protected boolean isConnected() {
-		return this.connected;
-	}
+//	protected boolean isConnected() {
+//		return this.connected;
+//	}
 }

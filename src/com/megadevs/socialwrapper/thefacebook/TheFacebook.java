@@ -1,7 +1,11 @@
 package com.megadevs.socialwrapper.thefacebook;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 import org.json.JSONArray;
@@ -9,31 +13,39 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.facebook.android.AsyncFacebookRunner;
+import com.facebook.android.DialogError;
 import com.facebook.android.Facebook;
 import com.facebook.android.FacebookError;
 import com.facebook.android.Util;
+import com.facebook.android.AsyncFacebookRunner.RequestListener;
+import com.facebook.android.Facebook.DialogListener;
 import com.megadevs.socialwrapper.SocialFriend;
 import com.megadevs.socialwrapper.SocialNetwork;
 import com.megadevs.socialwrapper.SocialSessionStore;
 import com.megadevs.socialwrapper.SocialWrapper;
 
 public class TheFacebook extends SocialNetwork {
-	
-	private TheFacebook iAmTheFacebook;
+
+	private static TheFacebook iAmTheFacebook;
 	private Facebook mFacebook;
 	private AsyncFacebookRunner mAsyncRunner;
 
 	private ArrayList<SocialFriend> mFacebookFriends;
-	
+
 	private Activity mActivity;
-	private final String appID = "210912465637288";
-	
+	private String appID;
+	private String accessToken;
+	private long accessExpires;
+
 	private final String appIDKey = "app_id";
 	private final String accessTokenKey = "access_token";
+	private final String accessExpiresKey = "access_token_expires";
 
 	/**
 	 * Default constructor for TheFacebook class. A context is
@@ -43,38 +55,41 @@ public class TheFacebook extends SocialNetwork {
 	 */
 	public TheFacebook(Activity a) {
 		iAmTheFacebook = this;
-
 		mActivity = a;
 		context = mActivity.getApplicationContext();
-		
-		connected = false;
-		connectionData = new HashMap<String, String>();
-		connectionData.put(appIDKey, appID);
-		
-		mFacebook = new Facebook(connectionData.get(appIDKey));
+//		connected = false;
+
+		SocialNetwork.logTag = "SocialWrapper-Facebook";
+	}
+
+	public static TheFacebook getInstance() {
+		return iAmTheFacebook;
+	}
+
+	public void setAppID(String id) {
+		appID = id;
+		mFacebook = new Facebook(appID);
 		mAsyncRunner = new AsyncFacebookRunner(mFacebook);
 
-		SocialNetwork.logTag = "Corso12 - Social - Facebook";
-		
-		// restoring an eventual saved session
-		SocialSessionStore.restore(SocialWrapper.FACEBOOK, context);
+		SocialSessionStore.restore(SocialWrapper.FACEBOOK, this, context);
 	}
 
 	@Override
 	public void authenticate() {
-		this.mFacebook.authorize(mActivity,
-				new String[] {"publish_stream", "read_stream", "offline_access"}, 
-				new AuthDialogListener(this));
+		if (mFacebook.isSessionValid())
+			Toast.makeText(context, "session valid", Toast.LENGTH_SHORT).show();
+		else
+			mActivity.startActivity(new Intent(mActivity, TheFacebookActivity.class));
 	}
 
 	@Override
 	public String selfPost(String msg) {
-        Bundle parameters = new Bundle();
-        mFacebook.dialog(mActivity,
-        		"stream.publish",
-        		parameters,
-        		new PostOnWallDialogListener(this));
-        return actionResult;
+		Bundle parameters = new Bundle();
+		this.mFacebook.dialog(mActivity,
+				"stream.publish",
+				parameters,
+				new PostOnWallDialogListener());
+		return actionResult;
 	}
 
 	@Override
@@ -82,23 +97,38 @@ public class TheFacebook extends SocialNetwork {
 		Vector<String[]> data = new Vector<String[]>();
 		data.add(new String[] {appIDKey, accessTokenKey});
 		data.add(new String[] {accessTokenKey, mFacebook.getAccessToken()});
+		data.add(new String[] {accessExpiresKey, String.valueOf(mFacebook.getAccessExpires())});
 		return data;
 	}
-	
+
+	@Override
+	protected void setConnectionData(Map<String, String> connectionData) {
+		if (connectionData.size()==0) {
+			this.connectionData = null;
+		}
+		else {
+			appID = connectionData.get(appIDKey);
+			accessToken = connectionData.get(accessTokenKey);
+			accessExpires = (Long.valueOf(connectionData.get(accessExpiresKey)).longValue());
+			mFacebook.setAccessToken(accessToken);
+			mFacebook.setAccessExpires(accessExpires);
+		}
+	}
+
 	@Override
 	public String postToFriend(String friendID, String msg) {
-        Bundle parameters = new Bundle();
-        parameters.putString("to", friendID);
-        mFacebook.dialog(mActivity,
-        		"stream.publish",
-        		parameters,
-        		new PostOnWallDialogListener(this));
-        return actionResult;
+		Bundle parameters = new Bundle();
+		parameters.putString("to", friendID);
+		mFacebook.dialog(mActivity,
+				"stream.publish",
+				parameters,
+				new PostOnWallDialogListener());
+		return actionResult;
 	}
-	
+
 	@Override
 	public ArrayList<SocialFriend> getFriendsList() {
-		mAsyncRunner.request("me/friends", new Bundle(), new FriendListRequestListener(this));
+		mAsyncRunner.request("me/friends", new Bundle(), new FriendListRequestListener());
 		return mFacebookFriends;
 	}
 
@@ -107,7 +137,7 @@ public class TheFacebook extends SocialNetwork {
 		//TODO metodo messi a disposizione da corso12, si spera
 		return null;
 	}
-	
+
 	/**
 	 * This method is used to let the listeners' implementations
 	 * post their result message: the 'actionResult' field will be
@@ -118,35 +148,43 @@ public class TheFacebook extends SocialNetwork {
 		actionResult = r;
 	}
 
-	
-	
+	/**
+	 * @return the mFacebook
+	 */
+	public Facebook getmFacebook() {
+		return mFacebook;
+	}
+
 	///
 	///	LISTENERS CLASSES, PRIVATE ACCESS
 	///
-	
-	private class AuthDialogListener extends TheFacebookBaseDialogListener {
-		public AuthDialogListener(TheFacebook f) {super(f);}
 
+	public class AuthDialogListener extends TheFacebookBaseDialogListener {
 		@Override
 		public void onComplete(Bundle values) {
 			Log.i(logTag, "login performed");
+
+			connectionData = new HashMap<String, String>();
+			connectionData.put(appIDKey, appID);
+			connectionData.put(accessTokenKey, mFacebook.getAccessToken());
+			connectionData.put(accessExpiresKey, String.valueOf(mFacebook.getAccessExpires()));
+
 			SocialSessionStore.save(SocialWrapper.FACEBOOK, iAmTheFacebook, context);
+//			connected = true;
 		}
 	}
 
 	public class FriendListRequestListener extends TheFacebookBaseRequestListener {
 
-		public FriendListRequestListener(TheFacebook f) {super(f);}
-
 		@Override
 		public void onComplete(String response, Object state) {
-	        
+
 			JSONObject json;
 			try {
 				json = Util.parseJson(response);
 				final JSONArray friends = json.getJSONArray("data");
 				mFacebookFriends = new ArrayList<SocialFriend>(friends.length());
-				
+
 				for (int i=0; i<friends.length(); i++) {
 					JSONObject j = friends.getJSONObject(i);
 					String id = j.getString("id");
@@ -162,9 +200,50 @@ public class TheFacebook extends SocialNetwork {
 		}
 	}
 
+	private abstract class TheFacebookBaseDialogListener implements DialogListener {
+
+		public void onFacebookError(FacebookError e) {
+			TheFacebook.this.setActionResult(SocialNetwork.SOCIAL_NETWORK_ERROR);
+			Log.d(SocialNetwork.logTag, SocialNetwork.SOCIAL_NETWORK_ERROR, e);
+		}
+
+		public void onError(DialogError e) {
+			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR);
+			Log.d(SocialNetwork.logTag, SocialNetwork.GENERAL_ERROR, e);   
+		}
+
+		public void onCancel() {
+			TheFacebook.this.setActionResult(SocialNetwork.ACTION_CANCELED);
+			Log.d(SocialNetwork.logTag, SocialNetwork.ACTION_CANCELED);
+		}
+
+	}
+
+	private abstract class TheFacebookBaseRequestListener implements RequestListener {
+
+		public void onFacebookError(FacebookError e, final Object state) {
+			TheFacebook.this.setActionResult(SocialNetwork.SOCIAL_NETWORK_ERROR);
+			Log.d(SocialNetwork.logTag, SocialNetwork.SOCIAL_NETWORK_ERROR, e);
+		}
+
+		public void onFileNotFoundException(FileNotFoundException e, final Object state) {
+			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR);
+			Log.d(SocialNetwork.logTag, SocialNetwork.GENERAL_ERROR, e);
+		}
+
+		public void onIOException(IOException e, final Object state) {
+			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR);
+			Log.d(SocialNetwork.logTag, SocialNetwork.GENERAL_ERROR, e);
+		}
+
+		public void onMalformedURLException(MalformedURLException e, final Object state) {
+			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR);
+			Log.d(SocialNetwork.logTag, SocialNetwork.GENERAL_ERROR, e);
+		}
+
+	}
+
 	private class PostOnWallDialogListener extends TheFacebookBaseDialogListener {
-		
-		public PostOnWallDialogListener(TheFacebook f) {super(f);}
 
 		@Override
 		public void onComplete(Bundle values) {

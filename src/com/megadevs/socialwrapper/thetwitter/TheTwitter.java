@@ -1,6 +1,8 @@
 package com.megadevs.socialwrapper.thetwitter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
 
@@ -39,7 +41,9 @@ public class TheTwitter extends SocialNetwork {
 
 	public TheTwitter(Activity activity) {
 		mActivity = activity;
-		connectionData = SocialSessionStore.restore(SocialWrapper.TWITTER, mActivity);	
+		
+		SocialSessionStore.restore(SocialWrapper.TWITTER, this, mActivity);	
+		
 		accessToken = getAccessToken();
 
 		ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
@@ -48,7 +52,7 @@ public class TheTwitter extends SocialNetwork {
 		Configuration configuration = configurationBuilder.build();
 		twitterFactory = new TwitterFactory(configuration);
 
-		logTag = "Corso12 - Social - Facebook";
+		logTag = "Corso12 - Social - Twitter";
 	}
 
 	public Twitter getTwitter() {
@@ -109,6 +113,9 @@ public class TheTwitter extends SocialNetwork {
 	}
 
 	private AccessToken getAccessToken() {
+		//TODO RIMUOVERE! --------------------------------------------------------------------------------------
+		if (connectionData == null)
+			connectionData = new HashMap<String, String>();
 		Log.i(logTag, "------ getAccessToken ------");
 		String s0 = connectionData.get(accessTokenKey);
 		String s1 = connectionData.get(accessTokenSecretKey);
@@ -267,5 +274,12 @@ public class TheTwitter extends SocialNetwork {
 		connList.add(new String[] {accessTokenKey, connectionData.get(accessTokenKey)});
 		connList.add(new String[] {accessTokenSecretKey, connectionData.get(accessTokenSecretKey)});
 		return connList;
+	}
+
+	@Override
+	protected void setConnectionData(Map<String, String> connectionData) {
+		// TODO Auto-generated method stub
+		// -------------------------------------------------------------------------------------------------
+		
 	}
 }
