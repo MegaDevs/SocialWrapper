@@ -4,6 +4,6 @@
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="src" path="FacebookAndroid_src"/>
-	<classpathentry kind="lib" path="libs/twitter4j-core-android-2.2.5-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/home/zeb/Desktop/workspace Eclipse Java/InDaTwitter/libs/twitter4j-core-android-2.2.5-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

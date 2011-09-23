@@ -45,7 +45,7 @@ public class TheTwitter extends SocialNetwork {
 		SocialSessionStore.restore(SocialWrapper.TWITTER, this, mActivity);	
 		
 		accessToken = getAccessToken();
-
+		
 		ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
 		configurationBuilder.setOAuthConsumerKey(consumerKey);
 		configurationBuilder.setOAuthConsumerSecret(consumerSecret);
@@ -278,8 +278,6 @@ public class TheTwitter extends SocialNetwork {
 
 	@Override
 	protected void setConnectionData(Map<String, String> connectionData) {
-		// TODO Auto-generated method stub
-		// -------------------------------------------------------------------------------------------------
-		
+		this.connectionData = connectionData;
 	}
 }
