@@ -16,7 +16,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.facebook.android.AsyncFacebookRunner;
 import com.facebook.android.DialogError;
@@ -57,9 +56,8 @@ public class TheFacebook extends SocialNetwork {
 		iAmTheFacebook = this;
 		mActivity = a;
 		context = mActivity.getApplicationContext();
-//		connected = false;
 
-		SocialNetwork.logTag = "SocialWrapper-Facebook";
+		SocialNetwork.tag = "SocialWrapper-Facebook";
 	}
 
 	public static TheFacebook getInstance() {
@@ -77,13 +75,17 @@ public class TheFacebook extends SocialNetwork {
 	@Override
 	public void authenticate() {
 		if (mFacebook.isSessionValid())
-			Toast.makeText(context, "session valid", Toast.LENGTH_SHORT).show();
+			Log.i(tag, "session valid, use it wisely ;)");
 		else
 			mActivity.startActivity(new Intent(mActivity, TheFacebookActivity.class));
 	}
 
 	@Override
-	public String selfPost(String msg) {
+	public void deauthenticate() {
+		SocialSessionStore.clear(SocialWrapper.FACEBOOK, context);
+	}
+	
+	public String selfPostToWall(String msg) {
 		Bundle parameters = new Bundle();
 		this.mFacebook.dialog(mActivity,
 				"stream.publish",
@@ -115,7 +117,6 @@ public class TheFacebook extends SocialNetwork {
 		}
 	}
 
-	@Override
 	public String postToFriend(String friendID, String msg) {
 		Bundle parameters = new Bundle();
 		parameters.putString("to", friendID);
@@ -156,13 +157,13 @@ public class TheFacebook extends SocialNetwork {
 	}
 
 	///
-	///	LISTENERS CLASSES, PRIVATE ACCESS
+	///	LISTENERS >IMPLEMENTATIONS< CLASSES, PRIVATE ACCESS
 	///
 
 	public class AuthDialogListener extends TheFacebookBaseDialogListener {
 		@Override
 		public void onComplete(Bundle values) {
-			Log.i(logTag, "login performed");
+			Log.i(tag, "login performed");
 
 			connectionData = new HashMap<String, String>();
 			connectionData.put(appIDKey, appID);
@@ -170,7 +171,6 @@ public class TheFacebook extends SocialNetwork {
 			connectionData.put(accessExpiresKey, String.valueOf(mFacebook.getAccessExpires()));
 
 			SocialSessionStore.save(SocialWrapper.FACEBOOK, iAmTheFacebook, context);
-//			connected = true;
 		}
 	}
 
@@ -193,54 +193,11 @@ public class TheFacebook extends SocialNetwork {
 					mFacebookFriends.add(new SocialFriend(id, name, img));
 				}
 			} catch (JSONException e) {
-				Log.e(logTag, "JSON error", e);
+				Log.e(tag, "JSON error", e);
 			} catch (FacebookError e) {
-				Log.e(logTag, "Facebook error", e);
+				Log.e(tag, "Facebook error", e);
 			}
 		}
-	}
-
-	private abstract class TheFacebookBaseDialogListener implements DialogListener {
-
-		public void onFacebookError(FacebookError e) {
-			TheFacebook.this.setActionResult(SocialNetwork.SOCIAL_NETWORK_ERROR);
-			Log.d(SocialNetwork.logTag, SocialNetwork.SOCIAL_NETWORK_ERROR, e);
-		}
-
-		public void onError(DialogError e) {
-			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR);
-			Log.d(SocialNetwork.logTag, SocialNetwork.GENERAL_ERROR, e);   
-		}
-
-		public void onCancel() {
-			TheFacebook.this.setActionResult(SocialNetwork.ACTION_CANCELED);
-			Log.d(SocialNetwork.logTag, SocialNetwork.ACTION_CANCELED);
-		}
-
-	}
-
-	private abstract class TheFacebookBaseRequestListener implements RequestListener {
-
-		public void onFacebookError(FacebookError e, final Object state) {
-			TheFacebook.this.setActionResult(SocialNetwork.SOCIAL_NETWORK_ERROR);
-			Log.d(SocialNetwork.logTag, SocialNetwork.SOCIAL_NETWORK_ERROR, e);
-		}
-
-		public void onFileNotFoundException(FileNotFoundException e, final Object state) {
-			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR);
-			Log.d(SocialNetwork.logTag, SocialNetwork.GENERAL_ERROR, e);
-		}
-
-		public void onIOException(IOException e, final Object state) {
-			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR);
-			Log.d(SocialNetwork.logTag, SocialNetwork.GENERAL_ERROR, e);
-		}
-
-		public void onMalformedURLException(MalformedURLException e, final Object state) {
-			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR);
-			Log.d(SocialNetwork.logTag, SocialNetwork.GENERAL_ERROR, e);
-		}
-
 	}
 
 	private class PostOnWallDialogListener extends TheFacebookBaseDialogListener {
@@ -248,7 +205,52 @@ public class TheFacebook extends SocialNetwork {
 		@Override
 		public void onComplete(Bundle values) {
 			actionResult = ACTION_SUCCESSFUL;
-			Log.d(logTag, actionResult);
+			Log.d(tag, actionResult);
+		}
+	}
+
+	///
+	///	LISTENERS >ABSTRACT< CLASSES, PRIVATE ACCESS
+	///
+	
+	private abstract class TheFacebookBaseDialogListener implements DialogListener {
+		
+		public void onFacebookError(FacebookError e) {
+			TheFacebook.this.setActionResult(SocialNetwork.SOCIAL_NETWORK_ERROR);
+			Log.d(SocialNetwork.tag, SocialNetwork.SOCIAL_NETWORK_ERROR, e);
+		}
+		
+		public void onError(DialogError e) {
+			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR);
+			Log.d(SocialNetwork.tag, SocialNetwork.GENERAL_ERROR, e);   
+		}
+		
+		public void onCancel() {
+			TheFacebook.this.setActionResult(SocialNetwork.ACTION_CANCELED);
+			Log.d(SocialNetwork.tag, SocialNetwork.ACTION_CANCELED);
+		}
+	}
+	
+	private abstract class TheFacebookBaseRequestListener implements RequestListener {
+		
+		public void onFacebookError(FacebookError e, final Object state) {
+			TheFacebook.this.setActionResult(SocialNetwork.SOCIAL_NETWORK_ERROR);
+			Log.d(SocialNetwork.tag, SocialNetwork.SOCIAL_NETWORK_ERROR, e);
+		}
+		
+		public void onFileNotFoundException(FileNotFoundException e, final Object state) {
+			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR);
+			Log.d(SocialNetwork.tag, SocialNetwork.GENERAL_ERROR, e);
+		}
+		
+		public void onIOException(IOException e, final Object state) {
+			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR);
+			Log.d(SocialNetwork.tag, SocialNetwork.GENERAL_ERROR, e);
+		}
+		
+		public void onMalformedURLException(MalformedURLException e, final Object state) {
+			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR);
+			Log.d(SocialNetwork.tag, SocialNetwork.GENERAL_ERROR, e);
 		}
 	}
 }

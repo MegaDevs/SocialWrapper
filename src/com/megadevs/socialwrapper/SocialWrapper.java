@@ -5,6 +5,7 @@ import java.util.Map;
 
 import android.app.Activity;
 
+import com.megadevs.socialwrapper.foursquare.TheFoursquare;
 import com.megadevs.socialwrapper.thefacebook.TheFacebook;
 import com.megadevs.socialwrapper.thetwitter.TheTwitter;
 
@@ -56,14 +57,19 @@ public class SocialWrapper {
 	public SocialNetwork getSocialNetwork(String id) {
 		if (socialNetworks.get(id) == null) {
 			if (id.equals(FACEBOOK)) {
-				TheFacebook f = new TheFacebook(mActivity);
-				socialNetworks.put(FACEBOOK, f);
-				return f;
+				TheFacebook fb = new TheFacebook(mActivity);
+				socialNetworks.put(FACEBOOK, fb);
+				return fb;
 			}
 			if (id.equals(TWITTER)) {
-				TheTwitter t = new TheTwitter(mActivity);
-				socialNetworks.put(TWITTER, t);
-				return t;
+				TheTwitter tw = new TheTwitter(mActivity);
+				socialNetworks.put(TWITTER, tw);
+				return tw;
+			}
+			if (id.equals(FOURSQUARE)) {
+				TheFoursquare fs = new TheFoursquare(mActivity);
+				socialNetworks.put(FOURSQUARE, fs);
+				return fs;
 			}
 			return null;
 		}

@@ -52,24 +52,24 @@ public class TheTwitter extends SocialNetwork {
 		Configuration configuration = configurationBuilder.build();
 		twitterFactory = new TwitterFactory(configuration);
 
-		logTag = "Corso12 - Social - Twitter";
+		tag = "Corso12-Social-Twitter";
 	}
 
 	public Twitter getTwitter() {
 		if(twitter == null) {
-			Log.i(logTag, "twitter non autenticato twitter == null");
+			Log.i(tag, "twitter non autenticato twitter == null");
 			if(accessToken == null) {
-				Log.i(logTag, "Non hai l'accessToken");
+				Log.i(tag, "Non hai l'accessToken");
 				return twitter = null;
 			} else {
-				Log.i(logTag, "Mi autentico con l'accessToken");
+				Log.i(tag, "Mi autentico con l'accessToken");
 				connectionData.put(accessTokenKey, accessToken.getToken());
 				connectionData.put(accessTokenSecretKey, accessToken.getTokenSecret());
-				Log.i(logTag, "------ TEST DI INSERIMENTO ------");
+				Log.i(tag, "------ TEST DI INSERIMENTO ------");
 				String s0 = connectionData.get(accessTokenKey);
 				String s1 = connectionData.get(accessTokenSecretKey);
-				Log.i(logTag, "------ " + s0 + " " + s1 + "------");
-				Log.i(logTag, "---------------------------------");
+				Log.i(tag, "------ " + s0 + " " + s1 + "------");
+				Log.i(tag, "---------------------------------");
 				SocialSessionStore.save(SocialWrapper.TWITTER, this, mActivity);
 				return twitter = twitterFactory.getInstance(accessToken);
 			}
@@ -77,20 +77,20 @@ public class TheTwitter extends SocialNetwork {
 			
 			setPropers();
 			
-			Log.i(logTag, "twitter già autenticato");
+			Log.i(tag, "twitter già autenticato");
 			return twitter;	
 		}
 	}
 
 	private void setPropers() {
-		Log.i(logTag, "Mi autentico con l'accessToken");
+		Log.i(tag, "Mi autentico con l'accessToken");
 		connectionData.put(accessTokenKey, accessToken.getToken());
 		connectionData.put(accessTokenSecretKey, accessToken.getTokenSecret());
-		Log.i(logTag, "------ TEST DI INSERIMENTO ------");
+		Log.i(tag, "------ TEST DI INSERIMENTO ------");
 		String s0 = connectionData.get(accessTokenKey);
 		String s1 = connectionData.get(accessTokenSecretKey);
-		Log.i(logTag, "------ " + s0 + " " + s1 + "------");
-		Log.i(logTag, "---------------------------------");
+		Log.i(tag, "------ " + s0 + " " + s1 + "------");
+		Log.i(tag, "---------------------------------");
 		SocialSessionStore.save(SocialWrapper.TWITTER, this, mActivity);
 	}
 	
@@ -98,17 +98,17 @@ public class TheTwitter extends SocialNetwork {
 		accessToken = accessTokenTemp;
 		
 		twitter = twitterFactory.getInstance(accessToken);
-		Log.i(logTag, "-------------------------------------_");
-		Log.i(logTag, "accessToken.getToken() " + accessToken.getToken());
-		Log.i(logTag, "twitter.verifyCredentials().getScreenName() " + twitter.verifyCredentials().getScreenName());
-		Log.i(logTag, "Ok, tutto fatto!!!");
-		Log.i(logTag, "-------------------------------------_");
+		Log.i(tag, "-------------------------------------_");
+		Log.i(tag, "accessToken.getToken() " + accessToken.getToken());
+		Log.i(tag, "twitter.verifyCredentials().getScreenName() " + twitter.verifyCredentials().getScreenName());
+		Log.i(tag, "Ok, tutto fatto!!!");
+		Log.i(tag, "-------------------------------------_");
 		twitter.updateStatus("1sfanculo cazzo " + new Random());
-		Log.i(logTag, "-------------------------------------_");
+		Log.i(tag, "-------------------------------------_");
 	}
 	
 	public static void deletePropers() {
-		Log.i(logTag, "elimino l'istanza di twitter che ho istanziato non autenticata");
+		Log.i(tag, "elimino l'istanza di twitter che ho istanziato non autenticata");
 		twitter = null;
 	}
 
@@ -116,16 +116,16 @@ public class TheTwitter extends SocialNetwork {
 		//TODO RIMUOVERE! --------------------------------------------------------------------------------------
 		if (connectionData == null)
 			connectionData = new HashMap<String, String>();
-		Log.i(logTag, "------ getAccessToken ------");
+		Log.i(tag, "------ getAccessToken ------");
 		String s0 = connectionData.get(accessTokenKey);
 		String s1 = connectionData.get(accessTokenSecretKey);
-		Log.i(logTag, "------ " + s0 + " " + s1 + "------");
-		Log.i(logTag, "---------------------------------");
+		Log.i(tag, "------ " + s0 + " " + s1 + "------");
+		Log.i(tag, "---------------------------------");
 		if(s0 == null && s1 == null) {
-			Log.i(logTag, "AccessToken null 1");
+			Log.i(tag, "AccessToken null 1");
 			return null;
 		}
-		Log.i(logTag, "AccessToken valido, lo ritorno");
+		Log.i(tag, "AccessToken valido, lo ritorno");
 		return new AccessToken(s0, s1);
 	} 
 
@@ -150,10 +150,10 @@ public class TheTwitter extends SocialNetwork {
 			accessToken = getAccessToken();
 
 			if (accessToken != null) {
-				Log.i(logTag, "accessToken già salvato, istanzio twitter");
+				Log.i(tag, "accessToken già salvato, istanzio twitter");
 				twitter = twitterFactory.getInstance(accessToken);
 			} else {
-				Log.i(logTag, "Effettuo il logIn via WebView");
+				Log.i(tag, "Effettuo il logIn via WebView");
 				// Non ho già l'accessToken, devo recuperarmelo
 				twitter = twitterFactory.getInstance();
 				RequestToken requestToken = twitter.getOAuthRequestToken(CALLBACKURL);
@@ -183,42 +183,45 @@ public class TheTwitter extends SocialNetwork {
 		OAuthLogin();
 
 		if(checkIstanceTwitter()) {
-			Log.i(logTag, "Autenticazione avvenuta con successo!");
+			Log.i(tag, "Autenticazione avvenuta con successo!");
 		} else {
-			Log.i(logTag, "Autenticazione non avvenuta!");
+			Log.i(tag, "Autenticazione non avvenuta!");
 		}
 	}
 
 	@Override
+	public void deauthenticate() {
+		//TODO zebbo sistemami --------------------------------------------------------------------------------------------------------------!!!!!!
+	}
+	
 	public String selfPost(String msg) {
 		try {
 			if(getTwitter() != null) {
 				twitter.updateStatus(msg + " " + new Random());
-				Log.i(logTag, ":-)");
+				Log.i(tag, ":-)");
 				actionResult = ACTION_SUCCESSFUL;
 			} else {
-				Log.i(logTag, ":-(");
+				Log.i(tag, ":-(");
 			}
 		} catch (TwitterException e) {
-			Log.i(logTag, ":-( exception", e);
+			Log.i(tag, ":-( exception", e);
 			actionResult = SOCIAL_NETWORK_ERROR + ": bisogna riautenticarsi";
 			removeAccessToken();
 		}
 		return actionResult;
 	}
 
-	@Override
 	public String postToFriend(String friendID, String msg) {
 		try {
 			if(getTwitter() != null) {
 				twitter.updateStatus("@" + friendID + " " + msg + " " + new Random());
-				Log.i(logTag, ":-)");
+				Log.i(tag, ":-)");
 				actionResult = ACTION_SUCCESSFUL;
 			} else {
-				Log.i(logTag, ":-(");
+				Log.i(tag, ":-(");
 			}
 		} catch (TwitterException e) {
-			Log.i(logTag, ":-( exception", e);
+			Log.i(tag, ":-( exception", e);
 			actionResult = SOCIAL_NETWORK_ERROR + ": bisogna riautenticarsi";
 			removeAccessToken();
 		}
@@ -244,18 +247,18 @@ public class TheTwitter extends SocialNetwork {
 					}
 				} while ((cursor = ids.getNextCursor()) != 0);
 				actionResult = ACTION_SUCCESSFUL;
-				Log.i(logTag, ":-)");
+				Log.i(tag, ":-)");
 				actionResult = ACTION_SUCCESSFUL;
 				return friendList;
 
 			} catch (TwitterException e) {
-				Log.i(logTag, ":-( exception", e);
+				Log.i(tag, ":-( exception", e);
 				actionResult = SOCIAL_NETWORK_ERROR + ": bisogna riautenticarsi";
 				removeAccessToken();
 				return friendList = new ArrayList<SocialFriend>();
 			}
 		} else {
-			Log.i(logTag, ":-( - ritorno una lista vuota");
+			Log.i(tag, ":-( - ritorno una lista vuota");
 			actionResult = SOCIAL_NETWORK_ERROR + ": bisogna riautenticarsi";
 			removeAccessToken();
 			return friendList;

@@ -9,11 +9,10 @@ import android.content.Context;
 public abstract class SocialNetwork {
 	
 	protected Map<String, String> connectionData;
-//	protected boolean connected;
 	protected Context context;
 	protected String actionResult;
 	
-	public static String logTag;
+	public static String tag;
 
 	public static final String ACTION_SUCCESSFUL = "Action successfully performed";
 	public static final String GENERAL_ERROR = "General error, check logs";
@@ -21,9 +20,7 @@ public abstract class SocialNetwork {
 	public static final String ACTION_CANCELED = "Action interrupted by user";
 	
 	public abstract void authenticate();
-	
-	public abstract String selfPost(String msg);
-	public abstract String postToFriend(String friendID, String msg);
+	public abstract void deauthenticate();
 	
 	public abstract ArrayList<SocialFriend> getFriendsList();
 	public abstract ArrayList<String> getFriendsUsingCorso12();
@@ -31,7 +28,4 @@ public abstract class SocialNetwork {
 	protected abstract Vector<String[]> getConnectionData();
 	protected abstract void setConnectionData(Map<String, String> connectionData);
 	
-//	protected boolean isConnected() {
-//		return this.connected;
-//	}
 }
