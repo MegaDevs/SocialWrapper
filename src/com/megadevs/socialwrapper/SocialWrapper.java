@@ -5,8 +5,8 @@ import java.util.Map;
 
 import android.app.Activity;
 
-import com.megadevs.socialwrapper.foursquare.TheFoursquare;
 import com.megadevs.socialwrapper.thefacebook.TheFacebook;
+import com.megadevs.socialwrapper.thefoursquare.TheFoursquare;
 import com.megadevs.socialwrapper.thetwitter.TheTwitter;
 
 public class SocialWrapper {
