@@ -111,7 +111,7 @@ public class TheFoursquare extends SocialNetwork {
 		
 		return mFoursquareFriends;
 	}
-
+ 
 	@Override
 	public ArrayList<String> getFriendsUsingCorso12() {
 		// TODO Auto-generated method stub
