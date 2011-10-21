@@ -22,28 +22,32 @@ import com.megadevs.socialwrapper.SocialWrapper;
 public class TheFoursquare extends SocialNetwork {
 
 	private Foursquare mFoursquare;
+	private static TheFoursquare iAmTheFoursquare;
 	private Activity mActivity;
 
 	private String clientID;
-	private String accessToken;
 	private String callbackURL;
+	private String accessToken;
 	
 	public final String clientIDKey = "client_id";
-	public final String accessTokenKey = "access_token";
 	public final String callbackURLKey = "callback_url";
+	public final String accessTokenKey = "access_token";
 	
 	private ArrayList<SocialFriend> mFoursquareFriends;
 	
 	public TheFoursquare(Activity a) {
 		mActivity = a;
+		iAmTheFoursquare = this;
 		
 		SocialNetwork.tag = "SocialWrapper-Foursquare";
 	}
 
+	public static TheFoursquare getInstance() {
+		return iAmTheFoursquare;
+	}
+	
 	@Override
 	public void authenticate() {
-		Log.i(tag, "dopo activity");
-		
 		if (mFoursquare.isSessionValid())
 			Log.i(tag, "session valid, use it wisely :P");
 		else {
@@ -79,12 +83,31 @@ public class TheFoursquare extends SocialNetwork {
 		}
 		else {
 			clientID = connectionData.get(clientIDKey);
-			accessToken = connectionData.get(accessTokenKey);
 			callbackURL = connectionData.get(callbackURLKey);
+			accessToken = connectionData.get(accessTokenKey);
 			
 			mFoursquare.setAccessToken(accessToken);
 		}
 	}
+	
+//	public ArrayList<GeoPoint> searchVenues(GeoPoint location) {
+//		int longitude = location.getLongitudeE6();
+//		int latitude = location.getLatitudeE6();
+//		String ll = String.valueOf(longitude) + "," + String.valueOf(latitude);
+//		
+//		Bundle b = new Bundle();
+//		b.putString("ll", ll);
+//
+//		try {
+//			mFoursquare.request("venues/search", b);
+//		} catch (MalformedURLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	}
 	
 	@Override
 	public ArrayList<SocialFriend> getFriendsList() {
@@ -94,9 +117,12 @@ public class TheFoursquare extends SocialNetwork {
 			return null;
 		}
 		
+		mFoursquareFriends = new ArrayList<SocialFriend>();
 		JSONObject obj;
 		try {
 			obj = new JSONObject(result);
+			// corresponds to the JSON response structure; see official API documentation
+			// for more informations
 			JSONObject response = obj.getJSONObject("response"); 
 			JSONObject friends = response.getJSONObject("friends");
 			JSONArray items = friends.getJSONArray("items");
@@ -133,12 +159,10 @@ public class TheFoursquare extends SocialNetwork {
 		SocialSessionStore.restore(SocialWrapper.FOURSQUARE, this, mActivity);
 	}
 	
-//	public void setActionResult(String result) {
-//		actionResult = result;
-//	}
-
 	public void setFoursquare(Foursquare obj) {
 		mFoursquare = obj;
+		// setting the newly-received access token
+		accessToken = mFoursquare.getAccessToken();
 		
 		Log.i(tag, "session validation: "+mFoursquare.isSessionValid());
 		

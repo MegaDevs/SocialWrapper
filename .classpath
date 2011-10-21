@@ -6,5 +6,6 @@
 	<classpathentry kind="lib" path="libs/twitter4j-core-android-2.2.4.jar"/>
 	<classpathentry excluding="com/jiramot/foursquare/android/FSAPITest.java" kind="src" path="FoursquareAndroid_src"/>
 	<classpathentry kind="src" path="FacebookAndroid_src"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

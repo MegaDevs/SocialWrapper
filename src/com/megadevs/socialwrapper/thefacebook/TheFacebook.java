@@ -42,6 +42,7 @@ public class TheFacebook extends SocialNetwork {
 	private String accessToken;
 	private long accessExpires;
 
+	
 	private final String appIDKey = "app_id";
 	private final String accessTokenKey = "access_token";
 	private final String accessExpiresKey = "access_token_expires";
@@ -76,8 +77,10 @@ public class TheFacebook extends SocialNetwork {
 	public void authenticate() {
 		if (mFacebook.isSessionValid())
 			Log.i(tag, "session valid, use it wisely ;)");
-		else
+		else {
 			mActivity.startActivity(new Intent(mActivity, TheFacebookActivity.class));
+			Log.i("corso", "valid session: " + mFacebook.isSessionValid());
+		}
 	}
 
 	@Override

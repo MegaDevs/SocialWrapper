@@ -23,9 +23,14 @@ public class TheFoursquareActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
+		iAmTheFoursquare = TheFoursquare.getInstance();
+		
 		Bundle b = getIntent().getExtras();
-		clientID = b.getString(iAmTheFoursquare.clientIDKey);
-		callbackURL = b.getString(iAmTheFoursquare.callbackURLKey);
+		String clientIDKey = TheFoursquare.getInstance().clientIDKey;
+		String callbackURLKey = TheFoursquare.getInstance().callbackURLKey;
+		
+		clientID = b.getString(clientIDKey);
+		callbackURL = b.getString(callbackURLKey);
 		
 		init(getIntent());
 	}
@@ -54,6 +59,8 @@ public class TheFoursquareActivity extends Activity {
 		public void onComplete(Bundle values) {
 			Log.i(SocialNetwork.tag, "login performed");
 			iAmTheFoursquare.setFoursquare(foursquare);
+			
+			finish();
 		}
 
 		@Override
