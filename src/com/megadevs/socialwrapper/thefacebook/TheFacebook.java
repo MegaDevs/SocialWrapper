@@ -74,30 +74,6 @@ public class TheFacebook extends SocialNetwork {
 	}
 
 	@Override
-	public void authenticate() {
-		if (mFacebook.isSessionValid())
-			Log.i(tag, "session valid, use it wisely ;)");
-		else {
-			mActivity.startActivity(new Intent(mActivity, TheFacebookActivity.class));
-			Log.i("corso", "valid session: " + mFacebook.isSessionValid());
-		}
-	}
-
-	@Override
-	public void deauthenticate() {
-		SocialSessionStore.clear(SocialWrapper.FACEBOOK, context);
-	}
-	
-	public String selfPostToWall(String msg) {
-		Bundle parameters = new Bundle();
-		this.mFacebook.dialog(mActivity,
-				"stream.publish",
-				parameters,
-				new PostOnWallDialogListener());
-		return actionResult;
-	}
-
-	@Override
 	public Vector<String[]> getConnectionData() {
 		Vector<String[]> data = new Vector<String[]>();
 		data.add(new String[] {appIDKey, accessTokenKey});
@@ -119,8 +95,32 @@ public class TheFacebook extends SocialNetwork {
 			mFacebook.setAccessExpires(accessExpires);
 		}
 	}
+	
+	@Override
+	public void authenticate() {
+		if (mFacebook.isSessionValid())
+			Log.i(tag, "session valid, use it wisely ;)");
+		else {
+			mActivity.startActivity(new Intent(mActivity, TheFacebookActivity.class));
+			Log.i("corso", "valid session: " + mFacebook.isSessionValid());
+		}
+	}
 
-	public String postToFriend(String friendID, String msg) {
+	@Override
+	public void deauthenticate() {
+		SocialSessionStore.clear(SocialWrapper.FACEBOOK, context);
+	}
+	
+	public String postOnMyWall() {
+		Bundle parameters = new Bundle();
+		this.mFacebook.dialog(mActivity,
+				"stream.publish",
+				parameters,
+				new PostOnWallDialogListener());
+		return actionResult;
+	}
+
+	public String postToFriendsWall(String friendID, String msg) {
 		Bundle parameters = new Bundle();
 		parameters.putString("to", friendID);
 		mFacebook.dialog(mActivity,
