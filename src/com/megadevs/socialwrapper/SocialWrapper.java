@@ -5,6 +5,7 @@ import java.util.Map;
 
 import android.app.Activity;
 
+import com.megadevs.socialwrapper.exceptions.SocialNetworkNotFoundException;
 import com.megadevs.socialwrapper.thefacebook.TheFacebook;
 import com.megadevs.socialwrapper.thefoursquare.TheFoursquare;
 import com.megadevs.socialwrapper.thetwitter.TheTwitter;
@@ -53,8 +54,9 @@ public class SocialWrapper {
 	 * (similar to a singleton implementation).
 	 * @param id the SocialNetwork id that must be returned
 	 * @return the proper SocialNetwork instance
+	 * @throws SocialNetworkNotFoundException when no socialnetwork with the provided id was found
 	 */
-	public SocialNetwork getSocialNetwork(String id) {
+	public SocialNetwork getSocialNetwork(String id) throws SocialNetworkNotFoundException {
 		if (socialNetworks.get(id) == null) {
 			if (id.equals(FACEBOOK)) {
 				TheFacebook fb = new TheFacebook(mActivity);
@@ -71,7 +73,9 @@ public class SocialWrapper {
 				socialNetworks.put(FOURSQUARE, fs);
 				return fs;
 			}
-			return null;
+			
+			// nothing was found, so an exception must be risen
+			throw new SocialNetworkNotFoundException("The selected SocialNetwork could not be found", null);
 		}
 		else
 			return socialNetworks.get(id);
