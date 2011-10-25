@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Vector;
 
+import com.megadevs.socialwrapper.exceptions.InvalidSocialRequestException;
+
 import android.content.Context;
 
 /**
@@ -42,8 +44,9 @@ public abstract class SocialNetwork {
 	 * This method retrieves the list of all the actual friends/followers of a social
 	 * account.
 	 * @return
+	 * @throws InvalidSocialRequestException 
 	 */
-	public abstract ArrayList<SocialFriend> getFriendsList();
+	public abstract ArrayList<SocialFriend> getFriendsList() throws InvalidSocialRequestException;
 	
 	/**
 	 * This method retrieves all the friends/followers of a social account which are using the

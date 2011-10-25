@@ -18,16 +18,17 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.facebook.android.AsyncFacebookRunner;
-import com.facebook.android.AsyncFacebookRunner.RequestListener;
 import com.facebook.android.DialogError;
 import com.facebook.android.Facebook;
-import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.FacebookError;
 import com.facebook.android.Util;
+import com.facebook.android.AsyncFacebookRunner.RequestListener;
+import com.facebook.android.Facebook.DialogListener;
 import com.megadevs.socialwrapper.SocialFriend;
 import com.megadevs.socialwrapper.SocialNetwork;
 import com.megadevs.socialwrapper.SocialSessionStore;
 import com.megadevs.socialwrapper.SocialWrapper;
+import com.megadevs.socialwrapper.exceptions.InvalidSocialRequestException;
 
 public class TheFacebook extends SocialNetwork {
 
@@ -36,12 +37,13 @@ public class TheFacebook extends SocialNetwork {
 	private AsyncFacebookRunner mAsyncRunner;
 
 	private ArrayList<SocialFriend> mFacebookFriends;
+	private volatile boolean updateRunning;
 
 	private Activity mActivity;
 	private String appID;
 	private String accessToken;
 	private long accessExpires;
-	
+
 	private final String appIDKey = "app_id";
 	private final String accessTokenKey = "access_token";
 	private final String accessExpiresKey = "access_token_expires";
@@ -56,6 +58,7 @@ public class TheFacebook extends SocialNetwork {
 		iAmTheFacebook = this;
 		mActivity = a;
 		context = mActivity.getApplicationContext();
+		updateRunning = false;
 
 		SocialNetwork.tag = "SocialWrapper-Facebook";
 	}
@@ -94,7 +97,7 @@ public class TheFacebook extends SocialNetwork {
 			mFacebook.setAccessExpires(accessExpires);
 		}
 	}
-	
+
 	@Override
 	public void authenticate() {
 		if (mFacebook.isSessionValid())
@@ -109,16 +112,27 @@ public class TheFacebook extends SocialNetwork {
 	public void deauthenticate() {
 		SocialSessionStore.clear(SocialWrapper.FACEBOOK, context);
 	}
-	
+
+	/**
+	 * This method is used to post on the user's wall. There is no message, since a dialog
+	 * will appear and let the user insert a custom message to post.
+	 * @return a string containing the result of the operation
+	 */
 	public String postOnMyWall() {
 		Bundle parameters = new Bundle();
 		this.mFacebook.dialog(mActivity,
 				"stream.publish",
 				parameters,
 				new PostOnWallDialogListener());
+		
 		return actionResult;
 	}
 
+//	private void handleResult() {
+//		if (actionResult.equals(SocialNetwork.GENERAL_ERROR))
+//			throw new 
+//	}
+//	
 	public String postToFriendsWall(String friendID, String msg) {
 		Bundle parameters = new Bundle();
 		parameters.putString("to", friendID);
@@ -130,9 +144,35 @@ public class TheFacebook extends SocialNetwork {
 	}
 
 	@Override
-	public ArrayList<SocialFriend> getFriendsList() {
-		mAsyncRunner.request("me/friends", new Bundle(), new FriendListRequestListener());
+	public ArrayList<SocialFriend> getFriendsList() throws InvalidSocialRequestException {
+		getFriendsAsync();
 		return mFacebookFriends;
+	}
+
+	/**
+	 * This method is actually used to invoke the asynchronous request for retrieving the 
+	 * list of friends and is only called by the public method getFriendsList(). It waits until
+	 * the response is obtained, parsed and properly processed, then ends and lets the 
+	 * getFriendsList() method return the whole data.
+	 * @throws InvalidSocialRequestException
+	 */
+	private void getFriendsAsync() throws InvalidSocialRequestException {
+		mAsyncRunner.request("me/friends", new Bundle(), new FriendListRequestListener());
+		mFacebookFriends = new ArrayList<SocialFriend>();
+		updateRunning = true;
+		try {
+			synchronized (mFacebookFriends) {
+				while (updateRunning) {
+					mFacebookFriends.wait();
+				}
+				
+				// once here, the mFacebookFriends object has been updated, so this method
+				// can terminate
+			}
+		}
+		catch(InterruptedException e) {
+			throw new InvalidSocialRequestException("The friends list could not be retrieved", e);
+		}
 	}
 
 	@Override
@@ -172,7 +212,9 @@ public class TheFacebook extends SocialNetwork {
 			connectionData.put(accessTokenKey, mFacebook.getAccessToken());
 			connectionData.put(accessExpiresKey, String.valueOf(mFacebook.getAccessExpires()));
 
+			// the valid session is saved in the app prefs
 			SocialSessionStore.save(SocialWrapper.FACEBOOK, iAmTheFacebook, context);
+			actionResult = SocialNetwork.ACTION_SUCCESSFUL;
 		}
 	}
 
@@ -180,26 +222,35 @@ public class TheFacebook extends SocialNetwork {
 
 		@Override
 		public void onComplete(String response, Object state) {
-
-			JSONObject json;
 			try {
-				json = Util.parseJson(response);
-				final JSONArray friends = json.getJSONArray("data");
-				mFacebookFriends = new ArrayList<SocialFriend>(friends.length());
-
-				for (int i=0; i<friends.length(); i++) {
-					JSONObject j = friends.getJSONObject(i);
-					String id = j.getString("id");
-					String name = j.getString("name");
-					String img = "http://graph.facebook.com/"+id+"/picture?type=small"; // <-- image size!
-					mFacebookFriends.add(new SocialFriend(id, name, img));
-				}
-			} catch (JSONException e) {
+				synchronized (mFacebookFriends) {
+					// now the answer gets parsed (according to Facebook's APIs)
+					JSONObject json;
+					json = Util.parseJson(response);
+					final JSONArray friends = json.getJSONArray("data");
+					
+					for (int i=0; i<friends.length(); i++) {
+						JSONObject j = friends.getJSONObject(i);
+						
+						String id = j.getString("id");
+						String name = j.getString("name");
+						String img = "http://graph.facebook.com/"+id+"/picture?type=small"; // <-- image size!
+						
+						mFacebookFriends.add(new SocialFriend(id, name, img));
+					}
+					
+					// the getFriendsAsync() method is still waiting, better
+					// to wake it up :P
+					updateRunning = false;
+					mFacebookFriends.notifyAll();
+				}	
+			}
+			catch (JSONException e) {
 				Log.e(tag, "JSON error", e);
 			} catch (FacebookError e) {
 				Log.e(tag, "Facebook error", e);
 			}
-		}
+		}			
 	}
 
 	private class PostOnWallDialogListener extends TheFacebookBaseDialogListener {
@@ -214,42 +265,42 @@ public class TheFacebook extends SocialNetwork {
 	///
 	///	LISTENERS >ABSTRACT< CLASSES, PRIVATE ACCESS
 	///
-	
+
 	private abstract class TheFacebookBaseDialogListener implements DialogListener {
-		
+
 		public void onFacebookError(FacebookError e) {
 			TheFacebook.this.setActionResult(SocialNetwork.SOCIAL_NETWORK_ERROR);
 			Log.d(SocialNetwork.tag, SocialNetwork.SOCIAL_NETWORK_ERROR, e);
 		}
-		
+
 		public void onError(DialogError e) {
 			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR);
 			Log.d(SocialNetwork.tag, SocialNetwork.GENERAL_ERROR, e);   
 		}
-		
+
 		public void onCancel() {
 			TheFacebook.this.setActionResult(SocialNetwork.ACTION_CANCELED);
 			Log.d(SocialNetwork.tag, SocialNetwork.ACTION_CANCELED);
 		}
 	}
-	
+
 	private abstract class TheFacebookBaseRequestListener implements RequestListener {
-		
+
 		public void onFacebookError(FacebookError e, final Object state) {
 			TheFacebook.this.setActionResult(SocialNetwork.SOCIAL_NETWORK_ERROR);
 			Log.d(SocialNetwork.tag, SocialNetwork.SOCIAL_NETWORK_ERROR, e);
 		}
-		
+
 		public void onFileNotFoundException(FileNotFoundException e, final Object state) {
 			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR);
 			Log.d(SocialNetwork.tag, SocialNetwork.GENERAL_ERROR, e);
 		}
-		
+
 		public void onIOException(IOException e, final Object state) {
 			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR);
 			Log.d(SocialNetwork.tag, SocialNetwork.GENERAL_ERROR, e);
 		}
-		
+
 		public void onMalformedURLException(MalformedURLException e, final Object state) {
 			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR);
 			Log.d(SocialNetwork.tag, SocialNetwork.GENERAL_ERROR, e);
