@@ -7,8 +7,8 @@ import android.util.Log;
 
 import com.jiramot.foursquare.android.DialogError;
 import com.jiramot.foursquare.android.Foursquare;
-import com.jiramot.foursquare.android.FoursquareError;
 import com.jiramot.foursquare.android.Foursquare.DialogListener;
+import com.jiramot.foursquare.android.FoursquareError;
 import com.megadevs.socialwrapper.SocialNetwork;
 
 public class TheFoursquareActivity extends Activity {
