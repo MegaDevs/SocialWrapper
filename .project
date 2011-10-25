@@ -36,10 +36,5 @@
 			<type>2</type>
 			<locationURI>_android_FacebookAndroid_3cd960a9/src</locationURI>
 		</link>
-		<link>
-			<name>FoursquareAndroid_src</name>
-			<type>2</type>
-			<locationURI>_android_FoursquareAndroid_db8dab0c/src</locationURI>
-		</link>
 	</linkedResources>
 </projectDescription>
