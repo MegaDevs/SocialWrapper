@@ -3,7 +3,10 @@
 	<classpathentry excluding="com/jiramot/foursquare/android/FSAPITest.java" kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
-	<classpathentry kind="lib" path="libs/twitter4j-core-android-2.2.4.jar"/>
+	<classpathentry kind="lib" path="libs/twitter4j-core-android-2.2.5.jar"/>
+	<classpathentry kind="lib" path="libs/httpclient-4.0.1.jar"/>
+	<classpathentry kind="lib" path="libs/signpost-commonshttp4-1.2.1.1.jar"/>
+	<classpathentry kind="lib" path="libs/signpost-core-1.2.1.1.jar"/>
 	<classpathentry kind="src" path="FacebookAndroid_src"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

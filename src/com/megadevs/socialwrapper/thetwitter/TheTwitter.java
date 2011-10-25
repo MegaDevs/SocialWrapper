@@ -41,11 +41,11 @@ public class TheTwitter extends SocialNetwork {
 
 	public TheTwitter(Activity activity) {
 		mActivity = activity;
-		
+
 		SocialSessionStore.restore(SocialWrapper.TWITTER, this, mActivity);	
-		
+
 		accessToken = getAccessToken();
-		
+
 		ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
 		configurationBuilder.setOAuthConsumerKey(consumerKey);
 		configurationBuilder.setOAuthConsumerSecret(consumerSecret);
@@ -74,9 +74,9 @@ public class TheTwitter extends SocialNetwork {
 				return twitter = twitterFactory.getInstance(accessToken);
 			}
 		} else {
-			
+
 			setPropers();
-			
+
 			Log.i(tag, "twitter già autenticato");
 			return twitter;	
 		}
@@ -93,10 +93,10 @@ public class TheTwitter extends SocialNetwork {
 		Log.i(tag, "---------------------------------");
 		SocialSessionStore.save(SocialWrapper.TWITTER, this, mActivity);
 	}
-	
+
 	public static void setPropersAccessToken(AccessToken accessTokenTemp) throws TwitterException {
 		accessToken = accessTokenTemp;
-		
+
 		twitter = twitterFactory.getInstance(accessToken);
 		Log.i(tag, "-------------------------------------_");
 		Log.i(tag, "accessToken.getToken() " + accessToken.getToken());
@@ -106,7 +106,7 @@ public class TheTwitter extends SocialNetwork {
 		twitter.updateStatus("1sfanculo cazzo " + new Random());
 		Log.i(tag, "-------------------------------------_");
 	}
-	
+
 	public static void deletePropers() {
 		Log.i(tag, "elimino l'istanza di twitter che ho istanziato non autenticata");
 		twitter = null;
@@ -191,9 +191,10 @@ public class TheTwitter extends SocialNetwork {
 
 	@Override
 	public void deauthenticate() {
-		//TODO zebbo sistemami --------------------------------------------------------------------------------------------------------------!!!!!!
+		deletePropers();
+		removeAccessToken();
 	}
-	
+
 	public String selfPost(String msg) {
 		try {
 			if(getTwitter() != null) {
@@ -267,7 +268,7 @@ public class TheTwitter extends SocialNetwork {
 
 	@Override
 	public ArrayList<String> getFriendsUsingCorso12() {
-		// TODO Auto-generated method stub
+		// TODO BURUBU
 		return null;
 	}
 
