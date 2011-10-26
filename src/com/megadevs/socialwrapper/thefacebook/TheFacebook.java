@@ -28,8 +28,16 @@ import com.megadevs.socialwrapper.SocialFriend;
 import com.megadevs.socialwrapper.SocialNetwork;
 import com.megadevs.socialwrapper.SocialSessionStore;
 import com.megadevs.socialwrapper.SocialWrapper;
+import com.megadevs.socialwrapper.exceptions.InvalidAuthenticationException;
 import com.megadevs.socialwrapper.exceptions.InvalidSocialRequestException;
 
+/**
+ * This class models a personal Facebook object. With an instance of 
+ * TheFacebook, it is possible to authenticate, post messages and retrieve
+ * informations.
+ * @author dextor
+ *
+ */
 public class TheFacebook extends SocialNetwork {
 
 	private static TheFacebook iAmTheFacebook;
@@ -40,10 +48,12 @@ public class TheFacebook extends SocialNetwork {
 	private volatile boolean updateRunning;
 
 	private Activity mActivity;
+	
 	private String appID;
 	private String accessToken;
 	private long accessExpires;
 
+	// keys for data storing
 	private final String appIDKey = "app_id";
 	private final String accessTokenKey = "access_token";
 	private final String accessExpiresKey = "access_token_expires";
@@ -67,11 +77,19 @@ public class TheFacebook extends SocialNetwork {
 		return iAmTheFacebook;
 	}
 
+	/**
+	 * This method is called from outside the wrapper and it is used to
+	 * set the application ID; the instanciation of the other objects 
+	 * (mFacebook and mAsyncRunner) can be done only after this action 
+	 * is completed.
+	 * @param id the application id provided by Facebook
+	 */
 	public void setAppID(String id) {
 		appID = id;
 		mFacebook = new Facebook(appID);
 		mAsyncRunner = new AsyncFacebookRunner(mFacebook);
 
+		// try to restore a previously saved session
 		SocialSessionStore.restore(SocialWrapper.FACEBOOK, this, context);
 	}
 
@@ -99,17 +117,23 @@ public class TheFacebook extends SocialNetwork {
 	}
 
 	@Override
-	public void authenticate() {
+	public void authenticate() throws InvalidAuthenticationException {
+		// check if a valid session is already available, otherwise perform
+		// a full login
 		if (mFacebook.isSessionValid())
 			Log.i(tag, "session valid, use it wisely ;)");
 		else {
 			mActivity.startActivity(new Intent(mActivity, TheFacebookActivity.class));
-			Log.i("corso", "valid session: " + mFacebook.isSessionValid());
+			Log.i(tag, "valid session: " + mFacebook.isSessionValid());
+			
+			if (actionResult != SocialNetwork.ACTION_SUCCESSFUL)
+				throw new InvalidAuthenticationException("Authentication could not be performed", null);
 		}
 	}
 
 	@Override
 	public void deauthenticate() {
+		// simply erases any previously stored session in the prefs
 		SocialSessionStore.clear(SocialWrapper.FACEBOOK, context);
 	}
 
@@ -117,29 +141,38 @@ public class TheFacebook extends SocialNetwork {
 	 * This method is used to post on the user's wall. There is no message, since a dialog
 	 * will appear and let the user insert a custom message to post.
 	 * @return a string containing the result of the operation
+	 * @throws InvalidSocialRequestException 
 	 */
-	public String postOnMyWall() {
+	public String postOnMyWall() throws InvalidSocialRequestException {
 		Bundle parameters = new Bundle();
 		this.mFacebook.dialog(mActivity,
 				"stream.publish",
 				parameters,
 				new PostOnWallDialogListener());
 		
+		if (actionResult != SocialNetwork.ACTION_SUCCESSFUL)
+			throw new InvalidSocialRequestException("Could not post to wall, please try again", actionException);
+		
 		return actionResult;
 	}
 
-//	private void handleResult() {
-//		if (actionResult.equals(SocialNetwork.GENERAL_ERROR))
-//			throw new 
-//	}
-//	
-	public String postToFriendsWall(String friendID, String msg) {
+	/**
+	 * This method is used to post on a friend's wall.
+	 * @param friendID the friend's ID provided by Facebook
+	 * @return a string containing the result of the operation
+	 * @throws InvalidSocialRequestException
+	 */
+	public String postToFriendsWall(String friendID) throws InvalidSocialRequestException {
 		Bundle parameters = new Bundle();
 		parameters.putString("to", friendID);
 		mFacebook.dialog(mActivity,
 				"stream.publish",
 				parameters,
 				new PostOnWallDialogListener());
+		
+		if (actionResult != SocialNetwork.ACTION_SUCCESSFUL)
+			throw new InvalidSocialRequestException("Could not post to friend's wall, please try again", actionException);
+		
 		return actionResult;
 	}
 
@@ -187,8 +220,9 @@ public class TheFacebook extends SocialNetwork {
 	 * returned by the proper methods.
 	 * @param r
 	 */
-	public void setActionResult(String r) {
+	public void setActionResult(String r, Exception e) {
 		actionResult = r;
+		actionException = e;
 	}
 
 	/**
@@ -258,7 +292,6 @@ public class TheFacebook extends SocialNetwork {
 		@Override
 		public void onComplete(Bundle values) {
 			actionResult = ACTION_SUCCESSFUL;
-			Log.d(tag, actionResult);
 		}
 	}
 
@@ -269,41 +302,41 @@ public class TheFacebook extends SocialNetwork {
 	private abstract class TheFacebookBaseDialogListener implements DialogListener {
 
 		public void onFacebookError(FacebookError e) {
-			TheFacebook.this.setActionResult(SocialNetwork.SOCIAL_NETWORK_ERROR);
-			Log.d(SocialNetwork.tag, SocialNetwork.SOCIAL_NETWORK_ERROR, e);
+			TheFacebook.this.setActionResult(SocialNetwork.SOCIAL_NETWORK_ERROR,null);
+			Log.d(tag, SocialNetwork.SOCIAL_NETWORK_ERROR, e);
 		}
 
 		public void onError(DialogError e) {
-			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR);
-			Log.d(SocialNetwork.tag, SocialNetwork.GENERAL_ERROR, e);   
+			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR,null);
+			Log.d(tag, SocialNetwork.GENERAL_ERROR, e);   
 		}
 
 		public void onCancel() {
-			TheFacebook.this.setActionResult(SocialNetwork.ACTION_CANCELED);
-			Log.d(SocialNetwork.tag, SocialNetwork.ACTION_CANCELED);
+			TheFacebook.this.setActionResult(SocialNetwork.ACTION_CANCELED,null);
+			Log.d(tag, SocialNetwork.ACTION_CANCELED);
 		}
 	}
 
 	private abstract class TheFacebookBaseRequestListener implements RequestListener {
 
 		public void onFacebookError(FacebookError e, final Object state) {
-			TheFacebook.this.setActionResult(SocialNetwork.SOCIAL_NETWORK_ERROR);
-			Log.d(SocialNetwork.tag, SocialNetwork.SOCIAL_NETWORK_ERROR, e);
+			TheFacebook.this.setActionResult(SocialNetwork.SOCIAL_NETWORK_ERROR,null);
+			Log.d(tag, SocialNetwork.SOCIAL_NETWORK_ERROR, e);
 		}
 
 		public void onFileNotFoundException(FileNotFoundException e, final Object state) {
-			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR);
-			Log.d(SocialNetwork.tag, SocialNetwork.GENERAL_ERROR, e);
+			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR,e);
+			Log.d(tag, SocialNetwork.GENERAL_ERROR, e);
 		}
 
 		public void onIOException(IOException e, final Object state) {
-			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR);
-			Log.d(SocialNetwork.tag, SocialNetwork.GENERAL_ERROR, e);
+			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR,e);
+			Log.d(tag, SocialNetwork.GENERAL_ERROR, e);
 		}
 
 		public void onMalformedURLException(MalformedURLException e, final Object state) {
-			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR);
-			Log.d(SocialNetwork.tag, SocialNetwork.GENERAL_ERROR, e);
+			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR,e);
+			Log.d(tag, SocialNetwork.GENERAL_ERROR, e);
 		}
 	}
 }

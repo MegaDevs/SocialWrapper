@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Vector;
 
+import com.megadevs.socialwrapper.exceptions.InvalidAuthenticationException;
 import com.megadevs.socialwrapper.exceptions.InvalidSocialRequestException;
 
 import android.content.Context;
@@ -20,6 +21,8 @@ public abstract class SocialNetwork {
 	protected Map<String, String> connectionData;
 	protected Context context;
 	protected String actionResult;
+	// it may be null
+	protected Exception actionException;
 	
 	public static String tag;
 
@@ -30,8 +33,9 @@ public abstract class SocialNetwork {
 	
 	/**
 	 * General abstract method which performs authentication.
+	 * @throws InvalidAuthenticationException 
 	 */
-	public abstract void authenticate();
+	public abstract void authenticate() throws InvalidAuthenticationException;
 	
 	/**
 	 * General abstract method which performs deauthentication. Since it is not possible
