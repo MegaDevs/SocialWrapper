@@ -8,6 +8,7 @@ import android.content.Context;
 
 import com.megadevs.socialwrapper.exceptions.InvalidAuthenticationException;
 import com.megadevs.socialwrapper.exceptions.InvalidSocialRequestException;
+import com.megadevs.socialwrapper.exceptions.NetworkErrorException;
 
 /**
  * This class tries to model a social network by abstracting its concept. Since every social
@@ -34,8 +35,9 @@ public abstract class SocialNetwork {
 	/**
 	 * General abstract method which performs authentication.
 	 * @throws InvalidAuthenticationException 
+	 * @throws NetworkErrorException 
 	 */
-	public abstract void authenticate() throws InvalidAuthenticationException;
+	public abstract void authenticate() throws InvalidAuthenticationException, NetworkErrorException;
 	
 	/**
 	 * General abstract method which performs deauthentication. Since it is not possible
@@ -49,8 +51,10 @@ public abstract class SocialNetwork {
 	 * account.
 	 * @return
 	 * @throws InvalidSocialRequestException 
+	 * @throws NetworkErrorException 
+	 * @throws InvalidAuthenticationException 
 	 */
-	public abstract ArrayList<SocialFriend> getFriendsList() throws InvalidSocialRequestException;
+	public abstract ArrayList<SocialFriend> getFriendsList() throws InvalidSocialRequestException, InvalidAuthenticationException;
 	
 	/**
 	 * This method retrieves all the friends/followers of a social account which are using the
