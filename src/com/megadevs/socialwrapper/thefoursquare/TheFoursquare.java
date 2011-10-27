@@ -136,12 +136,14 @@ public class TheFoursquare extends SocialNetwork {
 				JSONObject location = item.getJSONObject("location");
 				String lat = location.getString("lat");
 				String lon = location.getString("lng");
+				String dist = location.getString("distance");
 				
 				venues.add(new TheFoursquareVenue(
 						Float.valueOf(lat).intValue(),
 						Float.valueOf(lon).intValue(),
+						name,
 						id, 
-						name));
+						Integer.valueOf(dist).intValue()));
 			}
 			
 		} catch (MalformedURLException e) {
