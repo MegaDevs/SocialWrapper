@@ -3,7 +3,6 @@ package com.megadevs.socialwrapper.thetwitter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.Vector;
 
 import twitter4j.IDs;
@@ -23,6 +22,8 @@ import com.megadevs.socialwrapper.SocialFriend;
 import com.megadevs.socialwrapper.SocialNetwork;
 import com.megadevs.socialwrapper.SocialSessionStore;
 import com.megadevs.socialwrapper.SocialWrapper;
+import com.megadevs.socialwrapper.exceptions.InvalidAuthenticationException;
+import com.megadevs.socialwrapper.exceptions.InvalidSocialRequestException;
 
 public class TheTwitter extends SocialNetwork {
 
@@ -57,7 +58,7 @@ public class TheTwitter extends SocialNetwork {
 
 	public Twitter getTwitter() {
 		if(twitter == null) {
-			Log.i(tag, "twitter non autenticato twitter == null");
+			Log.i(tag, "twitter non autenticato. twitter == null");
 			if(accessToken == null) {
 				Log.i(tag, "Non hai l'accessToken");
 				return twitter = null;
@@ -65,46 +66,25 @@ public class TheTwitter extends SocialNetwork {
 				Log.i(tag, "Mi autentico con l'accessToken");
 				connectionData.put(accessTokenKey, accessToken.getToken());
 				connectionData.put(accessTokenSecretKey, accessToken.getTokenSecret());
-				Log.i(tag, "------ TEST DI INSERIMENTO ------");
-				String s0 = connectionData.get(accessTokenKey);
-				String s1 = connectionData.get(accessTokenSecretKey);
-				Log.i(tag, "------ " + s0 + " " + s1 + "------");
-				Log.i(tag, "---------------------------------");
 				SocialSessionStore.save(SocialWrapper.TWITTER, this, mActivity);
 				return twitter = twitterFactory.getInstance(accessToken);
 			}
 		} else {
-
 			setPropers();
-
 			Log.i(tag, "twitter già autenticato");
 			return twitter;	
 		}
 	}
 
 	private void setPropers() {
-		Log.i(tag, "Mi autentico con l'accessToken");
 		connectionData.put(accessTokenKey, accessToken.getToken());
 		connectionData.put(accessTokenSecretKey, accessToken.getTokenSecret());
-		Log.i(tag, "------ TEST DI INSERIMENTO ------");
-		String s0 = connectionData.get(accessTokenKey);
-		String s1 = connectionData.get(accessTokenSecretKey);
-		Log.i(tag, "------ " + s0 + " " + s1 + "------");
-		Log.i(tag, "---------------------------------");
 		SocialSessionStore.save(SocialWrapper.TWITTER, this, mActivity);
 	}
 
-	public static void setPropersAccessToken(AccessToken accessTokenTemp) throws TwitterException {
+	public static void setPropersAccessToken(AccessToken accessTokenTemp) {
 		accessToken = accessTokenTemp;
-
 		twitter = twitterFactory.getInstance(accessToken);
-		Log.i(tag, "-------------------------------------_");
-		Log.i(tag, "accessToken.getToken() " + accessToken.getToken());
-		Log.i(tag, "twitter.verifyCredentials().getScreenName() " + twitter.verifyCredentials().getScreenName());
-		Log.i(tag, "Ok, tutto fatto!!!");
-		Log.i(tag, "-------------------------------------_");
-		twitter.updateStatus("1sfanculo cazzo " + new Random());
-		Log.i(tag, "-------------------------------------_");
 	}
 
 	public static void deletePropers() {
@@ -113,16 +93,12 @@ public class TheTwitter extends SocialNetwork {
 	}
 
 	private AccessToken getAccessToken() {
-		//TODO RIMUOVERE! --------------------------------------------------------------------------------------
 		if (connectionData == null)
 			connectionData = new HashMap<String, String>();
-		Log.i(tag, "------ getAccessToken ------");
 		String s0 = connectionData.get(accessTokenKey);
 		String s1 = connectionData.get(accessTokenSecretKey);
-		Log.i(tag, "------ " + s0 + " " + s1 + "------");
-		Log.i(tag, "---------------------------------");
 		if(s0 == null && s1 == null) {
-			Log.i(tag, "AccessToken null 1");
+			Log.i(tag, "AccessToken null");
 			return null;
 		}
 		Log.i(tag, "AccessToken valido, lo ritorno");
@@ -145,7 +121,7 @@ public class TheTwitter extends SocialNetwork {
 			return true;
 	}
 
-	void OAuthLogin() {
+	private void OAuthLogin() throws InvalidAuthenticationException {
 		try {				
 			accessToken = getAccessToken();
 
@@ -168,24 +144,18 @@ public class TheTwitter extends SocialNetwork {
 			}
 
 		} catch (TwitterException ex) {
-			Log.e("in Main.OAuthLogin", ex.getMessage());
+			throw new InvalidAuthenticationException("Authentication could not be performed", ex);
 		}
 	}
 
 	@Override
-	public void authenticate() {
-		ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
-		configurationBuilder.setOAuthConsumerKey(consumerKey);
-		configurationBuilder.setOAuthConsumerSecret(consumerSecret);
-		Configuration configuration = configurationBuilder.build();
-		twitterFactory = new TwitterFactory(configuration);
+	public void authenticate() throws InvalidAuthenticationException {
 
 		OAuthLogin();
 
-		if(checkIstanceTwitter()) {
-			Log.i(tag, "Autenticazione avvenuta con successo!");
-		} else {
+		if(!checkIstanceTwitter()) {
 			Log.i(tag, "Autenticazione non avvenuta!");
+			throw new InvalidAuthenticationException("Authentication could not be performed", null);
 		}
 	}
 
@@ -195,42 +165,36 @@ public class TheTwitter extends SocialNetwork {
 		removeAccessToken();
 	}
 
-	public String selfPost(String msg) {
+	public void selfPost(String msg) throws InvalidAuthenticationException {
 		try {
 			if(getTwitter() != null) {
-				twitter.updateStatus(msg + " " + new Random());
+				twitter.updateStatus(msg);
 				Log.i(tag, ":-)");
-				actionResult = ACTION_SUCCESSFUL;
 			} else {
 				Log.i(tag, ":-(");
 			}
 		} catch (TwitterException e) {
 			Log.i(tag, ":-( exception", e);
-			actionResult = SOCIAL_NETWORK_ERROR + ": bisogna riautenticarsi";
 			removeAccessToken();
+			throw new InvalidAuthenticationException("Tweet could not be performed, try to reauthenticate", e);
 		}
-		return actionResult;
 	}
 
-	public String postToFriend(String friendID, String msg) {
+	public void postToFriend(String friendID, String msg) throws InvalidSocialRequestException {
 		try {
 			if(getTwitter() != null) {
-				twitter.updateStatus("@" + friendID + " " + msg + " " + new Random());
+				twitter.updateStatus("@" + friendID + " " + msg);
 				Log.i(tag, ":-)");
-				actionResult = ACTION_SUCCESSFUL;
-			} else {
-				Log.i(tag, ":-(");
 			}
 		} catch (TwitterException e) {
 			Log.i(tag, ":-( exception", e);
-			actionResult = SOCIAL_NETWORK_ERROR + ": bisogna riautenticarsi";
 			removeAccessToken();
+			throw new InvalidSocialRequestException("Could not tweet this friend, try to reauthenticate", e);
 		}
-		return actionResult;
 	}
 
 	@Override
-	public ArrayList<SocialFriend> getFriendsList() {
+	public ArrayList<SocialFriend> getFriendsList() throws InvalidSocialRequestException {
 		ArrayList<SocialFriend> friendList = new ArrayList<SocialFriend>();
 
 		if(getTwitter() != null) {
@@ -254,14 +218,14 @@ public class TheTwitter extends SocialNetwork {
 
 			} catch (TwitterException e) {
 				Log.i(tag, ":-( exception", e);
-				actionResult = SOCIAL_NETWORK_ERROR + ": bisogna riautenticarsi";
 				removeAccessToken();
-				return friendList = new ArrayList<SocialFriend>();
+				throw new InvalidSocialRequestException("Could not retrive the friends list, try to reauthenticate", e);
 			}
 		} else {
 			Log.i(tag, ":-( - ritorno una lista vuota");
 			actionResult = SOCIAL_NETWORK_ERROR + ": bisogna riautenticarsi";
 			removeAccessToken();
+			
 			return friendList;
 		}
 	}
