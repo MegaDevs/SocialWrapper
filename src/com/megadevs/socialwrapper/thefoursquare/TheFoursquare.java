@@ -57,8 +57,43 @@ public class TheFoursquare extends SocialNetwork {
 		SocialNetwork.tag = "SocialWrapper-Foursquare";
 	}
 
+	/**
+	 * This method is used within the callback procedure to
+	 * set the authenticated Foursquare object.
+	 * @return the existing instance of TheFoursquare
+	 */
 	public static TheFoursquare getInstance() {
 		return iAmTheFoursquare;
+	}
+	
+	/**
+	 * This method is called from outside the wrapper and it is used to
+	 * set the application ID and the callback URL; the 
+	 * instanciation of the mFoursquare object can be done 
+	 * only after this action is completed.
+	 * @param id the application id provided by Foursquare
+	 */
+	public void setFSParams(String id, String url) {
+		clientID = id;
+		callbackURL = url;
+		
+		mFoursquare = new Foursquare(clientID, callbackURL);
+		
+		SocialSessionStore.restore(SocialWrapper.FOURSQUARE, this, mActivity);
+	}
+	
+	/**
+	 * 
+	 * @param obj
+	 */
+	public void setFoursquare(Foursquare obj) {
+		mFoursquare = obj;
+		// setting the newly-received access token
+		accessToken = mFoursquare.getAccessToken();
+		
+		Log.i(tag, "session validation: "+mFoursquare.isSessionValid());
+		
+		SocialSessionStore.save(SocialWrapper.FOURSQUARE, this, mActivity);
 	}
 	
 	@Override
@@ -108,6 +143,18 @@ public class TheFoursquare extends SocialNetwork {
 		}
 	}
 	
+	/**
+	 * This method is used to seach the nearby venues from the 
+	 * current position. Each venue is then encapsulated in a 
+	 * TheFoursquareVenue object, which has the latitude/longitude
+	 * coordinates, the distance of the venue from the current 
+	 * position, the name and the id of the venue (these two are
+	 * assigned by Foursquare).
+	 * 
+	 * @param position the current position
+	 * @return an ArrayList of nearby venues
+	 * @throws InvalidSocialRequestException
+	 */
 	public ArrayList<TheFoursquareVenue> searchVenues(GeoPoint position) throws InvalidSocialRequestException {
 		int longitude = position.getLongitudeE6();
 		int latitude = position.getLatitudeE6();
@@ -192,24 +239,5 @@ public class TheFoursquare extends SocialNetwork {
 	public ArrayList<String> getFriendsUsingCorso12() {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	public void setFSParams(String id, String url) {
-		clientID = id;
-		callbackURL = url;
-		
-		mFoursquare = new Foursquare(clientID, callbackURL);
-		
-		SocialSessionStore.restore(SocialWrapper.FOURSQUARE, this, mActivity);
-	}
-	
-	public void setFoursquare(Foursquare obj) {
-		mFoursquare = obj;
-		// setting the newly-received access token
-		accessToken = mFoursquare.getAccessToken();
-		
-		Log.i(tag, "session validation: "+mFoursquare.isSessionValid());
-		
-		SocialSessionStore.save(SocialWrapper.FOURSQUARE, this, mActivity);
 	}
 }

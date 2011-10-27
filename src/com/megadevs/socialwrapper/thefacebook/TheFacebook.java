@@ -73,6 +73,11 @@ public class TheFacebook extends SocialNetwork {
 		SocialNetwork.tag = "SocialWrapper-Facebook";
 	}
 
+	/**
+	 * This method is used within the callback procedure to
+	 * set the authenticated Facebook object.
+	 * @return the existing instance of TheFacebook
+	 */
 	public static TheFacebook getInstance() {
 		return iAmTheFacebook;
 	}
