@@ -18,12 +18,12 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.facebook.android.AsyncFacebookRunner;
+import com.facebook.android.AsyncFacebookRunner.RequestListener;
 import com.facebook.android.DialogError;
 import com.facebook.android.Facebook;
+import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.FacebookError;
 import com.facebook.android.Util;
-import com.facebook.android.AsyncFacebookRunner.RequestListener;
-import com.facebook.android.Facebook.DialogListener;
 import com.megadevs.socialwrapper.SocialFriend;
 import com.megadevs.socialwrapper.SocialNetwork;
 import com.megadevs.socialwrapper.SocialSessionStore;
@@ -33,8 +33,8 @@ import com.megadevs.socialwrapper.exceptions.InvalidSocialRequestException;
 
 /**
  * This class models a personal Facebook object. With an instance of 
- * TheFacebook, it is possible to authenticate, post messages and retrieve
- * informations.
+ * TheFacebook it is possible to authenticate, post messages and retrieve
+ * various informations.
  * @author dextor
  *
  */
@@ -126,7 +126,7 @@ public class TheFacebook extends SocialNetwork {
 			mActivity.startActivity(new Intent(mActivity, TheFacebookActivity.class));
 			Log.i(tag, "valid session: " + mFacebook.isSessionValid());
 			
-			if (actionResult != SocialNetwork.ACTION_SUCCESSFUL)
+			if (actionResult != SocialNetwork.ACTION_SUCCESSFUL || !mFacebook.isSessionValid())
 				throw new InvalidAuthenticationException("Authentication could not be performed", null);
 		}
 	}

@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Vector;
 
+import android.content.Context;
+
 import com.megadevs.socialwrapper.exceptions.InvalidAuthenticationException;
 import com.megadevs.socialwrapper.exceptions.InvalidSocialRequestException;
-
-import android.content.Context;
 
 /**
  * This class tries to model a social network by abstracting its concept. Since every social

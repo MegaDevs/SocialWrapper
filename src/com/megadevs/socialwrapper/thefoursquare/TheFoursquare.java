@@ -1,5 +1,7 @@
 package com.megadevs.socialwrapper.thefoursquare;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Vector;
@@ -13,12 +15,22 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.google.android.maps.GeoPoint;
 import com.jiramot.foursquare.android.Foursquare;
 import com.megadevs.socialwrapper.SocialFriend;
 import com.megadevs.socialwrapper.SocialNetwork;
 import com.megadevs.socialwrapper.SocialSessionStore;
 import com.megadevs.socialwrapper.SocialWrapper;
+import com.megadevs.socialwrapper.exceptions.InvalidAuthenticationException;
+import com.megadevs.socialwrapper.exceptions.InvalidSocialRequestException;
 
+/**
+ * This class models a personal Foursquare object. With an instance of 
+ * TheFoursquare it is possible to authenticate, search venues and retrieve
+ * various informations.
+ * @author dextor
+ *
+ */
 public class TheFoursquare extends SocialNetwork {
 
 	private Foursquare mFoursquare;
@@ -34,7 +46,10 @@ public class TheFoursquare extends SocialNetwork {
 	public final String accessTokenKey = "access_token";
 	
 	private ArrayList<SocialFriend> mFoursquareFriends;
-	
+	/**
+	 * Defaul constructor for the TheFoursquare class.
+	 * @param a the main activity
+	 */
 	public TheFoursquare(Activity a) {
 		mActivity = a;
 		iAmTheFoursquare = this;
@@ -47,7 +62,7 @@ public class TheFoursquare extends SocialNetwork {
 	}
 	
 	@Override
-	public void authenticate() {
+	public void authenticate() throws InvalidAuthenticationException {
 		if (mFoursquare.isSessionValid())
 			Log.i(tag, "session valid, use it wisely :P");
 		else {
@@ -57,8 +72,11 @@ public class TheFoursquare extends SocialNetwork {
 			b.putString(callbackURLKey, callbackURL);
 			i.putExtras(b);
 			mActivity.startActivity(i);
-		}
 			
+			if (!mFoursquare.isSessionValid())
+				throw new InvalidAuthenticationException("Could not login on Fourquare", null);
+				
+		}
 	}
 
 	@Override
@@ -90,36 +108,60 @@ public class TheFoursquare extends SocialNetwork {
 		}
 	}
 	
-//	public ArrayList<GeoPoint> searchVenues(GeoPoint location) {
-//		int longitude = location.getLongitudeE6();
-//		int latitude = location.getLatitudeE6();
-//		String ll = String.valueOf(longitude) + "," + String.valueOf(latitude);
-//		
-//		Bundle b = new Bundle();
-//		b.putString("ll", ll);
-//
-//		try {
-//			mFoursquare.request("venues/search", b);
-//		} catch (MalformedURLException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//	}
+	public ArrayList<TheFoursquareVenue> searchVenues(GeoPoint position) throws InvalidSocialRequestException {
+		int longitude = position.getLongitudeE6();
+		int latitude = position.getLatitudeE6();
+		String ll = String.valueOf(longitude) + "," + String.valueOf(latitude);
+		
+		Bundle b = new Bundle();
+		b.putString("ll", ll);
+
+		ArrayList<TheFoursquareVenue> venues = null;
+		try {
+			String result = mFoursquare.request("venues/search", b);
+			
+			// parsing the request result
+			JSONObject obj = new JSONObject(result);
+			JSONObject response = obj.getJSONObject("response");
+			JSONArray groups = response.getJSONArray("groups");
+			JSONObject element = groups.getJSONObject(0);
+			JSONArray items = element.getJSONArray("items");
+			
+			venues = new ArrayList<TheFoursquareVenue>(items.length());
+			for (int i=0; i<items.length(); i++) {
+				JSONObject item = items.getJSONObject(i);
+				String id = item.getString("id");
+				String name = item.getString("name");
+				
+				JSONObject location = item.getJSONObject("location");
+				String lat = location.getString("lat");
+				String lon = location.getString("lng");
+				
+				venues.add(new TheFoursquareVenue(
+						Float.valueOf(lat).intValue(),
+						Float.valueOf(lon).intValue(),
+						id, 
+						name));
+			}
+			
+		} catch (MalformedURLException e) {
+			throw new InvalidSocialRequestException("Could not retrieve the nearby venues", e);
+		} catch (IOException e) {
+			throw new InvalidSocialRequestException("Could not retrieve the nearby venues", e);
+		} catch (JSONException e) {
+			throw new InvalidSocialRequestException("Could not retrieve the nearby venues", e);
+		}
+		return venues;
+	}
 	
 	@Override
-	public ArrayList<SocialFriend> getFriendsList() {
-		String result = mFoursquare.request("users/self/friends");
-		if (result == null) {
-			actionResult = SOCIAL_NETWORK_ERROR;
-			return null;
-		}
-		
+	public ArrayList<SocialFriend> getFriendsList() throws InvalidSocialRequestException {
 		mFoursquareFriends = new ArrayList<SocialFriend>();
-		JSONObject obj;
+
 		try {
+			String result = mFoursquare.request("users/self/friends");
+			
+			JSONObject obj;
 			obj = new JSONObject(result);
 			// corresponds to the JSON response structure; see official API documentation
 			// for more informations
@@ -138,7 +180,7 @@ public class TheFoursquare extends SocialNetwork {
 			}
 
 		} catch (JSONException e) {
-			Log.e(tag, "JSON error", e);
+			throw new InvalidSocialRequestException("Could not retrieve the nearby venues", e);
 		}
 		
 		return mFoursquareFriends;
