@@ -4,8 +4,7 @@
 shopt -s extglob
 
 SCRIPT_NAME=`basename $0`
-TOBEKEPT=$SCRIPT_NAME
-
+TOBEKEPT=$SCRIPT_NAME"|android-support-v4.jar|armeabi|CWAC-AdapterWrapper.jar|CWAC-Bus.jar|CWAC-Cache.jar|CWAC-Endless.jar|CWAC-Task.jar"
 
 ##############################
 # 			TWITTER			 #
