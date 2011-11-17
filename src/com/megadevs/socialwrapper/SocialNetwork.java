@@ -55,13 +55,6 @@ public abstract class SocialNetwork {
 	 * @throws InvalidAuthenticationException 
 	 */
 	public abstract ArrayList<SocialFriend> getFriendsList() throws InvalidSocialRequestException, InvalidAuthenticationException;
-	
-	/**
-	 * This method retrieves all the friends/followers of a social account which are using the
-	 * Corso12 application.
-	 * @return
-	 */
-	public abstract ArrayList<String> getFriendsUsingCorso12();
 
 	/**
 	 * This method is used to save the connection parameters of a SocialNetwork instance in the prefs.
@@ -77,4 +70,9 @@ public abstract class SocialNetwork {
 	 */
 	protected abstract void setConnectionData(Map<String, String> connectionData);
 	
+	/**
+	 * This method returns the access token for a valid session.
+	 * @return
+	 */
+	public abstract String getAccessToken();
 }

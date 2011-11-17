@@ -45,7 +45,7 @@ public class TheTwitter extends SocialNetwork {
 
 		SocialSessionStore.restore(SocialWrapper.TWITTER, this, mActivity);	
 
-		accessToken = getAccessToken();
+		accessToken = getAccessTokenInternal();
 
 		ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
 		configurationBuilder.setOAuthConsumerKey(consumerKey);
@@ -92,7 +92,7 @@ public class TheTwitter extends SocialNetwork {
 		twitter = null;
 	}
 
-	private AccessToken getAccessToken() {
+	private AccessToken getAccessTokenInternal() {
 		if (connectionData == null)
 			connectionData = new HashMap<String, String>();
 		String s0 = connectionData.get(accessTokenKey);
@@ -113,7 +113,7 @@ public class TheTwitter extends SocialNetwork {
 	}
 
 	private Boolean checkIstanceTwitter() {
-		accessToken = getAccessToken();
+		accessToken = getAccessTokenInternal();
 
 		if(accessToken == null)
 			return false;
@@ -123,7 +123,7 @@ public class TheTwitter extends SocialNetwork {
 
 	private void OAuthLogin() throws InvalidAuthenticationException {
 		try {				
-			accessToken = getAccessToken();
+			accessToken = getAccessTokenInternal();
 
 			if (accessToken != null) {
 				Log.i(tag, "accessToken già salvato, istanzio twitter");
@@ -231,12 +231,6 @@ public class TheTwitter extends SocialNetwork {
 	}
 
 	@Override
-	public ArrayList<String> getFriendsUsingCorso12() {
-		// TODO BURUBU
-		return null;
-	}
-
-	@Override
 	public Vector<String[]> getConnectionData() {
 		Vector<String[]> connList = new Vector<String[]>();
 		connList.add(new String[] {accessTokenKey, connectionData.get(accessTokenKey)});
@@ -247,5 +241,13 @@ public class TheTwitter extends SocialNetwork {
 	@Override
 	protected void setConnectionData(Map<String, String> connectionData) {
 		this.connectionData = connectionData;
+	}
+
+	@Override
+	public String getAccessToken() {
+		if (accessToken != null)
+			return accessToken.getToken()+';'+accessToken.getTokenSecret();
+
+		return null;
 	}
 }

@@ -125,8 +125,10 @@ public class TheFacebook extends SocialNetwork {
 	public void authenticate() throws InvalidAuthenticationException {
 		// check if a valid session is already available, otherwise perform
 		// a full login
-		if (mFacebook.isSessionValid())
+		if (mFacebook.isSessionValid()) {
 			Log.i(tag, "session valid, use it wisely ;)");
+			System.out.println(mFacebook.getAccessToken());
+		}
 		else {
 			mActivity.startActivity(new Intent(mActivity, TheFacebookActivity.class));
 			Log.i(tag, "valid session: " + mFacebook.isSessionValid());
@@ -211,12 +213,6 @@ public class TheFacebook extends SocialNetwork {
 		catch(InterruptedException e) {
 			throw new InvalidSocialRequestException("The friends list could not be retrieved", e);
 		}
-	}
-
-	@Override
-	public ArrayList<String> getFriendsUsingCorso12() {
-		//TODO metodo messi a disposizione da corso12, si spera
-		return null;
 	}
 
 	/**
@@ -343,5 +339,13 @@ public class TheFacebook extends SocialNetwork {
 			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR,e);
 			Log.d(tag, SocialNetwork.GENERAL_ERROR, e);
 		}
+	}
+
+	@Override
+	public String getAccessToken() {
+		if (accessToken != null)
+			return accessToken;
+		
+		return "";
 	}
 }
