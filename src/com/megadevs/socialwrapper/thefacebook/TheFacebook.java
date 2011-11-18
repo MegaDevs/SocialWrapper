@@ -122,7 +122,7 @@ public class TheFacebook extends SocialNetwork {
 	}
 
 	@Override
-	public void authenticate() throws InvalidAuthenticationException {
+	public boolean authenticate() throws InvalidAuthenticationException {
 		// check if a valid session is already available, otherwise perform
 		// a full login
 		if (mFacebook.isSessionValid()) {
@@ -136,12 +136,15 @@ public class TheFacebook extends SocialNetwork {
 			if (actionResult != SocialNetwork.ACTION_SUCCESSFUL || !mFacebook.isSessionValid())
 				throw new InvalidAuthenticationException("Authentication could not be performed", null);
 		}
+
+		return true;
 	}
 
 	@Override
-	public void deauthenticate() {
+	public boolean deauthenticate() {
 		// simply erases any previously stored session in the prefs
 		SocialSessionStore.clear(SocialWrapper.FACEBOOK, context);
+		return true;
 	}
 
 	/**

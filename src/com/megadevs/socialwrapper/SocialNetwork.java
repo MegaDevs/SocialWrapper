@@ -37,14 +37,14 @@ public abstract class SocialNetwork {
 	 * @throws InvalidAuthenticationException 
 	 * @throws NetworkErrorException 
 	 */
-	public abstract void authenticate() throws InvalidAuthenticationException, NetworkErrorException;
+	public abstract boolean authenticate() throws InvalidAuthenticationException, NetworkErrorException;
 	
 	/**
 	 * General abstract method which performs deauthentication. Since it is not possible
 	 * to revoke an authorization for an application via OAuth, this method simply must 
 	 * clear the saved prefs.
 	 */
-	public abstract void deauthenticate();
+	public abstract boolean deauthenticate();
 	
 	/**
 	 * This method retrieves the list of all the actual friends/followers of a social

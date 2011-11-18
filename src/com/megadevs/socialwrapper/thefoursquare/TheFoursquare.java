@@ -97,9 +97,10 @@ public class TheFoursquare extends SocialNetwork {
 	}
 	
 	@Override
-	public void authenticate() throws InvalidAuthenticationException {
-		if (mFoursquare.isSessionValid())
+	public boolean authenticate() throws InvalidAuthenticationException {
+		if (mFoursquare.isSessionValid()) {
 			Log.i(tag, "session valid, use it wisely :P");
+		}
 		else {
 			Intent i = new Intent(mActivity, TheFoursquareActivity.class);
 			Bundle b = new Bundle();
@@ -110,13 +111,15 @@ public class TheFoursquare extends SocialNetwork {
 			
 			if (!mFoursquare.isSessionValid())
 				throw new InvalidAuthenticationException("Could not login on Fourquare", null);
-				
 		}
+		
+		return true;
 	}
 
 	@Override
-	public void deauthenticate() {
+	public boolean deauthenticate() {
 		SocialSessionStore.clear(SocialWrapper.FOURSQUARE, mActivity);
+		return true;
 	}
 
 	@Override
