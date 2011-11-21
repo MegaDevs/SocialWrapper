@@ -50,7 +50,8 @@ public class TheFoursquare extends SocialNetwork {
 	 * Defaul constructor for the TheFoursquare class.
 	 * @param a the main activity
 	 */
-	public TheFoursquare(Activity a) {
+	public TheFoursquare(String id, Activity a) {
+		this.id = id;
 		mActivity = a;
 		iAmTheFoursquare = this;
 		
@@ -244,5 +245,11 @@ public class TheFoursquare extends SocialNetwork {
 			return accessToken;
 		
 		return null;
+	}
+
+	@Override
+	public boolean isAuthenticated() {
+		if (!accessToken.equals("")) return true;
+		else return false;
 	}
 }

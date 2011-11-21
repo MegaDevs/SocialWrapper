@@ -40,7 +40,8 @@ public class TheTwitter extends SocialNetwork {
 
 	private Activity mActivity;
 
-	public TheTwitter(Activity activity) {
+	public TheTwitter(String id, Activity activity) {
+		this.id = id;
 		mActivity = activity;
 
 		SocialSessionStore.restore(SocialWrapper.TWITTER, this, mActivity);	
@@ -149,7 +150,7 @@ public class TheTwitter extends SocialNetwork {
 	}
 
 	@Override
-	public void authenticate() throws InvalidAuthenticationException {
+	public boolean authenticate() throws InvalidAuthenticationException {
 
 		OAuthLogin();
 
@@ -157,12 +158,15 @@ public class TheTwitter extends SocialNetwork {
 			Log.i(tag, "Autenticazione non avvenuta!");
 			throw new InvalidAuthenticationException("Authentication could not be performed", null);
 		}
+		
+		return false;
 	}
 
 	@Override
-	public void deauthenticate() {
+	public boolean deauthenticate() {
 		deletePropers();
 		removeAccessToken();
+		return true;
 	}
 
 	public void selfPost(String msg) throws InvalidAuthenticationException {
@@ -249,5 +253,13 @@ public class TheTwitter extends SocialNetwork {
 			return accessToken.getToken()+';'+accessToken.getTokenSecret();
 
 		return null;
+	}
+
+	@Override
+	public boolean isAuthenticated() {
+		if (!accessToken.getToken().equals("") && (!accessToken.getTokenSecret().equals("")))
+			return true;
+		else
+			return false;
 	}
 }

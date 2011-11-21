@@ -19,6 +19,7 @@ import com.megadevs.socialwrapper.exceptions.NetworkErrorException;
  */
 public abstract class SocialNetwork {
 	
+	protected String id;
 	protected Map<String, String> connectionData;
 	protected Context context;
 	protected String actionResult;
@@ -75,4 +76,10 @@ public abstract class SocialNetwork {
 	 * @return
 	 */
 	public abstract String getAccessToken();
+	
+	public String getId() {
+		return id;
+	}
+	
+	public abstract boolean isAuthenticated();
 }

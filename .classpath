@@ -8,5 +8,6 @@
 	<classpathentry kind="lib" path="libs/signpost-core-1.2.1.1.jar"/>
 	<classpathentry kind="src" path="FacebookAndroid_src"/>
 	<classpathentry kind="lib" path="libs/httpclient-4.1.2.jar"/>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

@@ -64,7 +64,8 @@ public class TheFacebook extends SocialNetwork {
 	 * Facebook dialogs (if the official app is installed).
 	 * @param context
 	 */
-	public TheFacebook(Activity a) {
+	public TheFacebook(String id, Activity a) {
+		this.id = id;
 		iAmTheFacebook = this;
 		mActivity = a;
 		context = mActivity.getApplicationContext();
@@ -350,5 +351,11 @@ public class TheFacebook extends SocialNetwork {
 			return accessToken;
 		
 		return "";
+	}
+
+	@Override
+	public boolean isAuthenticated() {
+		if (!accessToken.equals("")) return true;
+		else return false;
 	}
 }

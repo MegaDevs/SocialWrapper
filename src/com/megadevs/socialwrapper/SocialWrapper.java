@@ -1,5 +1,6 @@
 package com.megadevs.socialwrapper;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,11 +13,11 @@ import com.megadevs.socialwrapper.thetwitter.TheTwitter;
 
 public class SocialWrapper {
 	
-	public static String FACEBOOK = "facebook";
-	public static String TWITTER = "twitter";
-	public static String FOURSQUARE = "foursquare";
-	public static String TUMBLR = "tumblr";
-	public static String FLICKR = "flickr";
+	public static String FACEBOOK = "Facebook";
+	public static String TWITTER = "Twitter";
+	public static String FOURSQUARE = "Foursquare";
+	public static String TUMBLR = "Tumblr";
+	public static String FLICKR = "Flickr";
 	
 	private static SocialWrapper socialWrapper;
 	private static Map<String, SocialNetwork> socialNetworks;
@@ -59,17 +60,17 @@ public class SocialWrapper {
 	public SocialNetwork getSocialNetwork(String id) throws SocialNetworkNotFoundException {
 		if (socialNetworks.get(id) == null) {
 			if (id.equals(FACEBOOK)) {
-				TheFacebook fb = new TheFacebook(mActivity);
+				TheFacebook fb = new TheFacebook(id, mActivity);
 				socialNetworks.put(FACEBOOK, fb);
 				return fb;
 			}
 			if (id.equals(TWITTER)) {
-				TheTwitter tw = new TheTwitter(mActivity);
+				TheTwitter tw = new TheTwitter(id, mActivity);
 				socialNetworks.put(TWITTER, tw);
 				return tw;
 			}
 			if (id.equals(FOURSQUARE)) {
-				TheFoursquare fs = new TheFoursquare(mActivity);
+				TheFoursquare fs = new TheFoursquare(id, mActivity);
 				socialNetworks.put(FOURSQUARE, fs);
 				return fs;
 			}
