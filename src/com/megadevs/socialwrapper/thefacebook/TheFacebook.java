@@ -112,6 +112,8 @@ public class TheFacebook extends SocialNetwork {
 	protected void setConnectionData(Map<String, String> connectionData) {
 		if (connectionData.size()==0) {
 			this.connectionData = null;
+			accessToken = "";
+			accessExpires = -1;
 		}
 		else {
 			appID = connectionData.get(appIDKey);
@@ -355,7 +357,8 @@ public class TheFacebook extends SocialNetwork {
 
 	@Override
 	public boolean isAuthenticated() {
-		if (!accessToken.equals("")) return true;
+		System.out.println(accessToken);
+		if (accessToken != "") return true;
 		else return false;
 	}
 }
