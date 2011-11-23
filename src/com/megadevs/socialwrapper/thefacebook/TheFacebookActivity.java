@@ -17,7 +17,6 @@ public class TheFacebookActivity extends Activity {
 	public void onCreate(Bundle savedInstance) {
 		super.onCreate(savedInstance);
 		setContentView(new View(this));
-		
 		TheFacebook f = TheFacebook.getInstance();
 		f.getmFacebook().authorize(this,
 				new String[] {"publish_stream", "read_stream", "offline_access"}, 

@@ -24,6 +24,7 @@ import com.megadevs.socialwrapper.SocialSessionStore;
 import com.megadevs.socialwrapper.SocialWrapper;
 import com.megadevs.socialwrapper.exceptions.InvalidAuthenticationException;
 import com.megadevs.socialwrapper.exceptions.InvalidSocialRequestException;
+import com.megadevs.socialwrapper.exceptions.NetworkErrorException;
 
 public class TheTwitter extends SocialNetwork {
 
@@ -150,7 +151,7 @@ public class TheTwitter extends SocialNetwork {
 	}
 
 	@Override
-	public boolean authenticate() throws InvalidAuthenticationException {
+	public void authenticate(SocialBaseCallback r) throws InvalidAuthenticationException {
 
 		OAuthLogin();
 
@@ -159,14 +160,12 @@ public class TheTwitter extends SocialNetwork {
 			throw new InvalidAuthenticationException("Authentication could not be performed", null);
 		}
 		
-		return false;
 	}
 
 	@Override
-	public boolean deauthenticate() {
+	public void deauthenticate() {
 		deletePropers();
 		removeAccessToken();
-		return true;
 	}
 
 	public void selfPost(String msg) throws InvalidAuthenticationException {
@@ -198,7 +197,7 @@ public class TheTwitter extends SocialNetwork {
 	}
 
 	@Override
-	public ArrayList<SocialFriend> getFriendsList() throws InvalidSocialRequestException {
+	public void getFriendsList(SocialBaseCallback s) throws InvalidSocialRequestException {
 		ArrayList<SocialFriend> friendList = new ArrayList<SocialFriend>();
 
 		if(getTwitter() != null) {
@@ -218,7 +217,6 @@ public class TheTwitter extends SocialNetwork {
 				actionResult = ACTION_SUCCESSFUL;
 				Log.i(tag, ":-)");
 				actionResult = ACTION_SUCCESSFUL;
-				return friendList;
 
 			} catch (TwitterException e) {
 				Log.i(tag, ":-( exception", e);
@@ -229,8 +227,6 @@ public class TheTwitter extends SocialNetwork {
 			Log.i(tag, ":-( - ritorno una lista vuota");
 			actionResult = SOCIAL_NETWORK_ERROR + ": bisogna riautenticarsi";
 			removeAccessToken();
-			
-			return friendList;
 		}
 	}
 

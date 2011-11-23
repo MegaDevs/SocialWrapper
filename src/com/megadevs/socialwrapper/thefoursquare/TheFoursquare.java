@@ -98,7 +98,7 @@ public class TheFoursquare extends SocialNetwork {
 	}
 	
 	@Override
-	public boolean authenticate() throws InvalidAuthenticationException {
+	public void authenticate(SocialBaseCallback r) throws InvalidAuthenticationException {
 		if (mFoursquare.isSessionValid()) {
 			Log.i(tag, "session valid, use it wisely :P");
 		}
@@ -114,13 +114,11 @@ public class TheFoursquare extends SocialNetwork {
 				throw new InvalidAuthenticationException("Could not login on Fourquare", null);
 		}
 		
-		return true;
 	}
 
 	@Override
-	public boolean deauthenticate() {
+	public void deauthenticate() {
 		SocialSessionStore.clear(SocialWrapper.FOURSQUARE, mActivity);
-		return true;
 	}
 
 	@Override
@@ -208,7 +206,7 @@ public class TheFoursquare extends SocialNetwork {
 	}
 	
 	@Override
-	public ArrayList<SocialFriend> getFriendsList() throws InvalidSocialRequestException {
+	public void getFriendsList(SocialBaseCallback s) throws InvalidSocialRequestException {
 		mFoursquareFriends = new ArrayList<SocialFriend>();
 
 		try {
@@ -235,8 +233,6 @@ public class TheFoursquare extends SocialNetwork {
 		} catch (JSONException e) {
 			throw new InvalidSocialRequestException("Could not retrieve the nearby venues", e);
 		}
-		
-		return mFoursquareFriends;
 	}
 
 	@Override
@@ -252,4 +248,5 @@ public class TheFoursquare extends SocialNetwork {
 		if (!accessToken.equals("")) return true;
 		else return false;
 	}
+
 }

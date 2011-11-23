@@ -38,14 +38,14 @@ public abstract class SocialNetwork {
 	 * @throws InvalidAuthenticationException 
 	 * @throws NetworkErrorException 
 	 */
-	public abstract boolean authenticate() throws InvalidAuthenticationException, NetworkErrorException;
+	public abstract void authenticate(SocialBaseCallback s) throws InvalidAuthenticationException, NetworkErrorException;
 	
 	/**
 	 * General abstract method which performs deauthentication. Since it is not possible
 	 * to revoke an authorization for an application via OAuth, this method simply must 
 	 * clear the saved prefs.
 	 */
-	public abstract boolean deauthenticate();
+	public abstract void deauthenticate();
 	
 	/**
 	 * This method retrieves the list of all the actual friends/followers of a social
@@ -55,7 +55,7 @@ public abstract class SocialNetwork {
 	 * @throws NetworkErrorException 
 	 * @throws InvalidAuthenticationException 
 	 */
-	public abstract ArrayList<SocialFriend> getFriendsList() throws InvalidSocialRequestException, InvalidAuthenticationException;
+	public abstract void getFriendsList(SocialBaseCallback s) throws InvalidSocialRequestException, InvalidAuthenticationException;
 
 	/**
 	 * This method is used to save the connection parameters of a SocialNetwork instance in the prefs.
@@ -77,9 +77,14 @@ public abstract class SocialNetwork {
 	 */
 	public abstract String getAccessToken();
 	
-	public String getId() {
-		return id;
-	}
+	public String getId() {return id;}
 	
 	public abstract boolean isAuthenticated();
+	
+	public static interface SocialBaseCallback {
+		public void onLoginCallback(String result);
+		public void onPostCallback(String result);
+		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list);
+		public void onErrorCallback(String error);
+	}
 }

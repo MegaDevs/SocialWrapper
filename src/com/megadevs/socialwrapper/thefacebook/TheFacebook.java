@@ -45,10 +45,9 @@ public class TheFacebook extends SocialNetwork {
 	private AsyncFacebookRunner mAsyncRunner;
 
 	private ArrayList<SocialFriend> mFacebookFriends;
-	private volatile boolean updateRunning;
 
 	private Activity mActivity;
-	
+
 	private String appID;
 	private String accessToken;
 	private long accessExpires;
@@ -57,6 +56,18 @@ public class TheFacebook extends SocialNetwork {
 	private final String appIDKey = "app_id";
 	private final String accessTokenKey = "access_token";
 	private final String accessExpiresKey = "access_token_expires";
+
+	// statics for image size
+	public static final String FACEBOOK_PHOTO_SMALL 	= "small";
+	public static final String FACEBOOK_PHOTO_MEDIUM 	= "medium";
+	public static final String FACEBOOK_PHOTO_BIG 		= "big";
+	
+	private String facebookPhotoSize;
+	
+	// static callback refs
+	private TheFacebookLoginCallback loginCallback;
+	private TheFacebookPostCallback postCallback;
+	private TheFacebookFriendListCallback friendslistCallback;
 
 	/**
 	 * Default constructor for TheFacebook class. A context is
@@ -69,7 +80,6 @@ public class TheFacebook extends SocialNetwork {
 		iAmTheFacebook = this;
 		mActivity = a;
 		context = mActivity.getApplicationContext();
-		updateRunning = false;
 
 		SocialNetwork.tag = "SocialWrapper-Facebook";
 	}
@@ -125,29 +135,24 @@ public class TheFacebook extends SocialNetwork {
 	}
 
 	@Override
-	public boolean authenticate() throws InvalidAuthenticationException {
-		// check if a valid session is already available, otherwise perform
-		// a full login
+	public void authenticate(SocialBaseCallback r) throws InvalidAuthenticationException {
+		// check if a valid session is already available, otherwise perform a full login
+		loginCallback = (TheFacebookLoginCallback)r;
 		if (mFacebook.isSessionValid()) {
 			Log.i(tag, "session valid, use it wisely ;)");
 			System.out.println(mFacebook.getAccessToken());
 		}
 		else {
-			mActivity.startActivity(new Intent(mActivity, TheFacebookActivity.class));
 			Log.i(tag, "valid session: " + mFacebook.isSessionValid());
-			
-			if (actionResult != SocialNetwork.ACTION_SUCCESSFUL || !mFacebook.isSessionValid())
-				throw new InvalidAuthenticationException("Authentication could not be performed", null);
+			Intent i = new Intent(mActivity, TheFacebookActivity.class);
+			mActivity.startActivity(i);
 		}
-
-		return true;
 	}
 
 	@Override
-	public boolean deauthenticate() {
+	public void deauthenticate() {
 		// simply erases any previously stored session in the prefs
 		SocialSessionStore.clear(SocialWrapper.FACEBOOK, context);
-		return true;
 	}
 
 	/**
@@ -156,17 +161,12 @@ public class TheFacebook extends SocialNetwork {
 	 * @return a string containing the result of the operation
 	 * @throws InvalidSocialRequestException 
 	 */
-	public String postOnMyWall() throws InvalidSocialRequestException {
-		Bundle parameters = new Bundle();
+	public void postOnMyWall(SocialBaseCallback s) throws InvalidSocialRequestException {
+		postCallback = (TheFacebookPostCallback) s;
 		this.mFacebook.dialog(mActivity,
 				"stream.publish",
-				parameters,
+				new Bundle(),
 				new PostOnWallDialogListener());
-		
-		if (actionResult != SocialNetwork.ACTION_SUCCESSFUL)
-			throw new InvalidSocialRequestException("Could not post to wall, please try again", actionException);
-		
-		return actionResult;
 	}
 
 	/**
@@ -175,51 +175,22 @@ public class TheFacebook extends SocialNetwork {
 	 * @return a string containing the result of the operation
 	 * @throws InvalidSocialRequestException
 	 */
-	public String postToFriendsWall(String friendID) throws InvalidSocialRequestException {
+	public void postToFriendsWall(String friendID, SocialBaseCallback s) throws InvalidSocialRequestException {
+		friendslistCallback = (TheFacebookFriendListCallback) s;
 		Bundle parameters = new Bundle();
 		parameters.putString("to", friendID);
 		mFacebook.dialog(mActivity,
 				"stream.publish",
 				parameters,
 				new PostOnWallDialogListener());
-		
-		if (actionResult != SocialNetwork.ACTION_SUCCESSFUL)
-			throw new InvalidSocialRequestException("Could not post to friend's wall, please try again", actionException);
-		
-		return actionResult;
 	}
 
 	@Override
-	public ArrayList<SocialFriend> getFriendsList() throws InvalidSocialRequestException {
-		getFriendsAsync();
-		return mFacebookFriends;
+	public void getFriendsList(SocialBaseCallback s) throws InvalidSocialRequestException {
+		mFacebookFriends = new ArrayList<SocialFriend>();
+		mAsyncRunner.request("me/friends", new Bundle(), new FriendListRequestListener());
 	}
 
-	/**
-	 * This method is actually used to invoke the asynchronous request for retrieving the 
-	 * list of friends and is only called by the public method getFriendsList(). It waits until
-	 * the response is obtained, parsed and properly processed, then ends and lets the 
-	 * getFriendsList() method return the whole data.
-	 * @throws InvalidSocialRequestException
-	 */
-	private void getFriendsAsync() throws InvalidSocialRequestException {
-		mAsyncRunner.request("me/friends", new Bundle(), new FriendListRequestListener());
-		mFacebookFriends = new ArrayList<SocialFriend>();
-		updateRunning = true;
-		try {
-			synchronized (mFacebookFriends) {
-				while (updateRunning) {
-					mFacebookFriends.wait();
-				}
-				
-				// once here, the mFacebookFriends object has been updated, so this method
-				// can terminate
-			}
-		}
-		catch(InterruptedException e) {
-			throw new InvalidSocialRequestException("The friends list could not be retrieved", e);
-		}
-	}
 
 	/**
 	 * This method is used to let the listeners' implementations
@@ -239,11 +210,59 @@ public class TheFacebook extends SocialNetwork {
 		return mFacebook;
 	}
 
+
+	@Override
+	public String getAccessToken() {
+		if (accessToken != null)
+			return accessToken;
+
+		return "";
+	}
+
+	@Override
+	public boolean isAuthenticated() {
+		System.out.println(accessToken);
+		if (accessToken != "") return true;
+		else return false;
+	}
+
+	/**
+	 * Sets the profile picture size for each friend returned from the
+	 * 'getFriendsList' method.
+	 * @param size
+	 */
+	public void setFacebookPhotoSize(String size) {
+		facebookPhotoSize = size;
+	}
+	
 	///
-	///	LISTENERS >IMPLEMENTATIONS< CLASSES, PRIVATE ACCESS
+	///	LISTENERS >IMPLEMENTATIONS< CLASSES, MAY HAVE PRIVATE ACCESS
 	///
 
-	public class AuthDialogListener extends TheFacebookBaseDialogListener {
+	public static abstract class TheFacebookLoginCallback implements SocialBaseCallback {
+		public abstract void onLoginCallback(String result);
+		public void onPostCallback(String result) {};
+		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
+		public abstract void onErrorCallback(String error); 
+	}
+
+	public static abstract class TheFacebookPostCallback implements SocialBaseCallback {
+		public void onLoginCallback(String result) {};
+		public abstract void onPostCallback(String result);
+		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
+		public abstract void onErrorCallback(String error);
+	}
+
+	public static abstract class TheFacebookFriendListCallback implements SocialBaseCallback {
+		public void onLoginCallback(String result) {};
+		public void onPostCallback(String result) {};
+		public abstract void onFriendsListCallback(String result, ArrayList<SocialFriend> list);
+		public abstract void onErrorCallback(String error);
+	}
+	
+	// needs to have package visibility, otherwise TheFacebookActivity cannot perform the login process
+	class AuthDialogListener extends TheFacebookBaseDialogListener {
+
 		@Override
 		public void onComplete(Bundle values) {
 			Log.i(tag, "login performed");
@@ -256,42 +275,46 @@ public class TheFacebook extends SocialNetwork {
 			// the valid session is saved in the app prefs
 			SocialSessionStore.save(SocialWrapper.FACEBOOK, iAmTheFacebook, context);
 			actionResult = SocialNetwork.ACTION_SUCCESSFUL;
+
+			if (loginCallback != null) {
+				loginCallback.onLoginCallback(actionResult);
+				loginCallback = null;
+			}
 		}
 	}
 
-	public class FriendListRequestListener extends TheFacebookBaseRequestListener {
+	private class FriendListRequestListener extends TheFacebookBaseRequestListener {
 
 		@Override
 		public void onComplete(String response, Object state) {
+			// now the answer gets parsed (according to Facebook's APIs)
+			JSONObject json;
 			try {
-				synchronized (mFacebookFriends) {
-					// now the answer gets parsed (according to Facebook's APIs)
-					JSONObject json;
-					json = Util.parseJson(response);
-					final JSONArray friends = json.getJSONArray("data");
-					
-					for (int i=0; i<friends.length(); i++) {
-						JSONObject j = friends.getJSONObject(i);
-						
-						String id = j.getString("id");
-						String name = j.getString("name");
-						String img = "http://graph.facebook.com/"+id+"/picture?type=small"; // <-- image size!
-						
-						mFacebookFriends.add(new SocialFriend(id, name, img));
-					}
-					
-					// the getFriendsAsync() method is still waiting, better
-					// to wake it up :P
-					updateRunning = false;
-					mFacebookFriends.notifyAll();
-				}	
-			}
-			catch (JSONException e) {
-				Log.e(tag, "JSON error", e);
+				json = Util.parseJson(response);
+				
+				final JSONArray friends = json.getJSONArray("data");
+
+				for (int i=0; i<friends.length(); i++) {
+					JSONObject j = friends.getJSONObject(i);
+
+					String id = j.getString("id");
+					String name = j.getString("name");
+					String img = "http://graph.facebook.com/"+id+"/picture?type="+facebookPhotoSize;
+
+					mFacebookFriends.add(new SocialFriend(id, name, img));
+				}
+			} catch (JSONException e) {
+				e.printStackTrace();
 			} catch (FacebookError e) {
-				Log.e(tag, "Facebook error", e);
+				e.printStackTrace();
 			}
-		}			
+
+			actionResult = ACTION_SUCCESSFUL;
+			if (friendslistCallback != null) {
+				friendslistCallback.onFriendsListCallback(actionResult, mFacebookFriends);
+				friendslistCallback = null;
+			}
+		}	
 	}
 
 	private class PostOnWallDialogListener extends TheFacebookBaseDialogListener {
@@ -299,6 +322,11 @@ public class TheFacebook extends SocialNetwork {
 		@Override
 		public void onComplete(Bundle values) {
 			actionResult = ACTION_SUCCESSFUL;
+
+			if (postCallback != null) {
+				postCallback.onPostCallback(actionResult);
+				postCallback = null;
+			}
 		}
 	}
 
@@ -308,57 +336,67 @@ public class TheFacebook extends SocialNetwork {
 
 	private abstract class TheFacebookBaseDialogListener implements DialogListener {
 
+		private void forwardResult() {
+			if (loginCallback != null)
+				loginCallback.onErrorCallback(actionResult);
+			else if (postCallback != null)
+				postCallback.onErrorCallback(actionResult);
+			else if (friendslistCallback != null)
+				friendslistCallback.onErrorCallback(actionResult);
+		}
+
 		public void onFacebookError(FacebookError e) {
 			TheFacebook.this.setActionResult(SocialNetwork.SOCIAL_NETWORK_ERROR,null);
+			forwardResult();
 			Log.d(tag, SocialNetwork.SOCIAL_NETWORK_ERROR, e);
 		}
 
 		public void onError(DialogError e) {
 			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR,null);
+			forwardResult();
 			Log.d(tag, SocialNetwork.GENERAL_ERROR, e);   
 		}
 
 		public void onCancel() {
 			TheFacebook.this.setActionResult(SocialNetwork.ACTION_CANCELED,null);
+			forwardResult();
 			Log.d(tag, SocialNetwork.ACTION_CANCELED);
 		}
 	}
 
 	private abstract class TheFacebookBaseRequestListener implements RequestListener {
 
+		private void forwardResult() {
+			if (loginCallback != null)
+				loginCallback.onErrorCallback(actionResult);
+			else if (postCallback != null)
+				postCallback.onErrorCallback(actionResult);
+			else if (friendslistCallback != null)
+				friendslistCallback.onErrorCallback(actionResult);
+		}
+
 		public void onFacebookError(FacebookError e, final Object state) {
 			TheFacebook.this.setActionResult(SocialNetwork.SOCIAL_NETWORK_ERROR,null);
+			forwardResult();
 			Log.d(tag, SocialNetwork.SOCIAL_NETWORK_ERROR, e);
 		}
 
 		public void onFileNotFoundException(FileNotFoundException e, final Object state) {
 			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR,e);
+			forwardResult();
 			Log.d(tag, SocialNetwork.GENERAL_ERROR, e);
 		}
 
 		public void onIOException(IOException e, final Object state) {
 			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR,e);
+			forwardResult();
 			Log.d(tag, SocialNetwork.GENERAL_ERROR, e);
 		}
 
 		public void onMalformedURLException(MalformedURLException e, final Object state) {
 			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR,e);
+			forwardResult();
 			Log.d(tag, SocialNetwork.GENERAL_ERROR, e);
 		}
-	}
-
-	@Override
-	public String getAccessToken() {
-		if (accessToken != null)
-			return accessToken;
-		
-		return "";
-	}
-
-	@Override
-	public boolean isAuthenticated() {
-		System.out.println(accessToken);
-		if (accessToken != "") return true;
-		else return false;
 	}
 }

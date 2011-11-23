@@ -1,6 +1,5 @@
 package com.megadevs.socialwrapper;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
