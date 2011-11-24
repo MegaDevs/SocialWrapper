@@ -53,11 +53,16 @@ public class TheFoursquareActivity extends Activity {
 		@Override
 		public void onCancel() {
 			Log.d(SocialNetwork.tag, SocialNetwork.ACTION_CANCELED);
+			iAmTheFoursquare.setActionResult(SocialNetwork.ACTION_CANCELED);
+			iAmTheFoursquare.forwardResult();
+			
+			finish();
 		}
 
 		@Override 
 		public void onComplete(Bundle values) {
 			Log.i(SocialNetwork.tag, "login performed");
+			iAmTheFoursquare.setActionResult(SocialNetwork.ACTION_SUCCESSFUL);
 			iAmTheFoursquare.setFoursquare(foursquare);
 			
 			finish();
@@ -66,11 +71,19 @@ public class TheFoursquareActivity extends Activity {
 		@Override
 		public void onError(DialogError e) {
 			Log.d(SocialNetwork.tag, SocialNetwork.GENERAL_ERROR, e);
+			iAmTheFoursquare.setActionResult(SocialNetwork.GENERAL_ERROR);
+			iAmTheFoursquare.forwardResult();
+			
+			finish();
 		}
 
 		@Override
 		public void onFoursquareError(FoursquareError e) {
 			Log.d(TheFoursquare.tag, SocialNetwork.SOCIAL_NETWORK_ERROR, e);
+			iAmTheFoursquare.setActionResult(SocialNetwork.SOCIAL_NETWORK_ERROR);
+			iAmTheFoursquare.forwardResult();
+			
+			finish();
 		}
 		
 	}

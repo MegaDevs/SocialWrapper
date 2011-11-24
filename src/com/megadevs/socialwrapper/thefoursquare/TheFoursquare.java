@@ -45,6 +45,11 @@ public class TheFoursquare extends SocialNetwork {
 	public final String callbackURLKey = "callback_url";
 	public final String accessTokenKey = "access_token";
 	
+	// static callback refs
+	private TheFoursquareLoginCallback loginCallback;
+	private TheFoursquareFriendListCallback friendslistCallback;
+
+	
 	private ArrayList<SocialFriend> mFoursquareFriends;
 	/**
 	 * Defaul constructor for the TheFoursquare class.
@@ -93,14 +98,20 @@ public class TheFoursquare extends SocialNetwork {
 		accessToken = mFoursquare.getAccessToken();
 		
 		Log.i(tag, "session validation: "+mFoursquare.isSessionValid());
-		
 		SocialSessionStore.save(SocialWrapper.FOURSQUARE, this, mActivity);
+		
+		if (loginCallback != null) {
+			loginCallback.onLoginCallback(actionResult);
+			loginCallback = null;
+		}
 	}
 	
 	@Override
 	public void authenticate(SocialBaseCallback r) throws InvalidAuthenticationException {
+		loginCallback = (TheFoursquareLoginCallback) r;
 		if (mFoursquare.isSessionValid()) {
 			Log.i(tag, "session valid, use it wisely :P");
+			loginCallback.onLoginCallback(SocialNetwork.ACTION_SUCCESSFUL);
 		}
 		else {
 			Intent i = new Intent(mActivity, TheFoursquareActivity.class);
@@ -109,9 +120,7 @@ public class TheFoursquare extends SocialNetwork {
 			b.putString(callbackURLKey, callbackURL);
 			i.putExtras(b);
 			mActivity.startActivity(i);
-			
-			if (!mFoursquare.isSessionValid())
-				throw new InvalidAuthenticationException("Could not login on Fourquare", null);
+			System.out.println("fuuuuuuu"); //da controllare se viene avviata
 		}
 		
 	}
@@ -144,6 +153,14 @@ public class TheFoursquare extends SocialNetwork {
 			mFoursquare.setAccessToken(accessToken);
 		}
 	}
+	
+	public void forwardResult() {
+		if (loginCallback != null)
+			loginCallback.onErrorCallback(actionResult);
+		else if (friendslistCallback != null)
+			friendslistCallback.onErrorCallback(actionResult);
+	}
+
 	
 	/**
 	 * This method is used to seach the nearby venues from the 
@@ -249,4 +266,32 @@ public class TheFoursquare extends SocialNetwork {
 		else return false;
 	}
 
+	public void setActionResult(String result) {actionResult = result;}
+	
+	///
+	///	CALLBACK ADAPTER CLASSES
+	///
+	
+	public static abstract class TheFoursquareLoginCallback implements SocialBaseCallback {
+		public abstract void onLoginCallback(String result);
+		public void onSearchVenuesCallback(String result, ArrayList<TheFoursquareVenue> list) {};
+		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
+		public abstract void onErrorCallback(String error); 
+	}
+
+	public static abstract class TheFoursquareSearchCallback implements SocialBaseCallback {
+		public void onLoginCallback(String result) {};
+		public abstract void onSearchVenuesCallback(String result, ArrayList<TheFoursquareVenue> list);
+		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
+		public abstract void onErrorCallback(String error);
+	}
+
+	public static abstract class TheFoursquareFriendListCallback implements SocialBaseCallback {
+		public void onLoginCallback(String result) {};
+		public void onSearchVenuesCallback(String result, ArrayList<TheFoursquareVenue> list) {};
+		public abstract void onFriendsListCallback(String result, ArrayList<SocialFriend> list);
+		public abstract void onErrorCallback(String error);
+	}
+
+	
 }

@@ -140,7 +140,7 @@ public class TheFacebook extends SocialNetwork {
 		loginCallback = (TheFacebookLoginCallback)r;
 		if (mFacebook.isSessionValid()) {
 			Log.i(tag, "session valid, use it wisely ;)");
-			System.out.println(mFacebook.getAccessToken());
+			loginCallback.onLoginCallback(SocialNetwork.ACTION_SUCCESSFUL);
 		}
 		else {
 			Log.i(tag, "valid session: " + mFacebook.isSessionValid());
@@ -162,6 +162,7 @@ public class TheFacebook extends SocialNetwork {
 	 * @throws InvalidSocialRequestException 
 	 */
 	public void postOnMyWall(SocialBaseCallback s) throws InvalidSocialRequestException {
+		actionResult = null;
 		postCallback = (TheFacebookPostCallback) s;
 		this.mFacebook.dialog(mActivity,
 				"stream.publish",
@@ -187,6 +188,7 @@ public class TheFacebook extends SocialNetwork {
 
 	@Override
 	public void getFriendsList(SocialBaseCallback s) throws InvalidSocialRequestException {
+		friendslistCallback = (TheFacebookFriendListCallback) s;
 		mFacebookFriends = new ArrayList<SocialFriend>();
 		mAsyncRunner.request("me/friends", new Bundle(), new FriendListRequestListener());
 	}

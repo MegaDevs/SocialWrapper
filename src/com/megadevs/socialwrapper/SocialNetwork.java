@@ -83,7 +83,6 @@ public abstract class SocialNetwork {
 	
 	public static interface SocialBaseCallback {
 		public void onLoginCallback(String result);
-		public void onPostCallback(String result);
 		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list);
 		public void onErrorCallback(String error);
 	}
