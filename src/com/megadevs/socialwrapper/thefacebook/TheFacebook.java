@@ -217,7 +217,7 @@ public class TheFacebook extends SocialNetwork {
 
 	@Override
 	public String getAccessToken() {
-		if (accessToken != null)
+		if (accessToken != null && accessToken != "")
 			return accessToken;
 
 		return "";
@@ -225,7 +225,7 @@ public class TheFacebook extends SocialNetwork {
 
 	@Override
 	public boolean isAuthenticated() {
-		if (accessToken != "") return true;
+		if (accessToken != null && accessToken != "") return true;
 		else return false;
 	}
 

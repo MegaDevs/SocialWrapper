@@ -120,7 +120,6 @@ public class TheFoursquare extends SocialNetwork {
 			b.putString(callbackURLKey, callbackURL);
 			i.putExtras(b);
 			mActivity.startActivity(i);
-			System.out.println("fuuuuuuu"); //da controllare se viene avviata
 		}
 		
 	}
@@ -263,7 +262,7 @@ public class TheFoursquare extends SocialNetwork {
 
 	@Override
 	public boolean isAuthenticated() {
-		if (accessToken != "") return true;
+		if (accessToken != null && accessToken != "") return true;
 		else return false;
 	}
 
