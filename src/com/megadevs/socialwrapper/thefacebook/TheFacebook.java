@@ -151,6 +151,8 @@ public class TheFacebook extends SocialNetwork {
 
 	@Override
 	public void deauthenticate() {
+		accessToken = "";
+		accessExpires = -1;
 		// simply erases any previously stored session in the prefs
 		SocialSessionStore.clear(SocialWrapper.FACEBOOK, context);
 	}
@@ -223,7 +225,6 @@ public class TheFacebook extends SocialNetwork {
 
 	@Override
 	public boolean isAuthenticated() {
-		System.out.println(accessToken);
 		if (accessToken != "") return true;
 		else return false;
 	}

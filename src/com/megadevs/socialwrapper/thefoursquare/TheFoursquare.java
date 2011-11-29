@@ -127,6 +127,7 @@ public class TheFoursquare extends SocialNetwork {
 
 	@Override
 	public void deauthenticate() {
+		accessToken = "";
 		SocialSessionStore.clear(SocialWrapper.FOURSQUARE, mActivity);
 	}
 
@@ -262,7 +263,7 @@ public class TheFoursquare extends SocialNetwork {
 
 	@Override
 	public boolean isAuthenticated() {
-		if (!accessToken.equals("")) return true;
+		if (accessToken != "") return true;
 		else return false;
 	}
 

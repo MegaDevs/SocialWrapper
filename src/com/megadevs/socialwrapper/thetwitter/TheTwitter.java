@@ -253,7 +253,7 @@ public class TheTwitter extends SocialNetwork {
 
 	@Override
 	public boolean isAuthenticated() {
-		if (!accessToken.getToken().equals("") && (!accessToken.getTokenSecret().equals("")))
+		if (accessToken != null && accessToken.getToken() != "" && (accessToken.getTokenSecret() != ""))
 			return true;
 		else
 			return false;
