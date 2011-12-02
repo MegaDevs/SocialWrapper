@@ -19,7 +19,7 @@ public class TheFacebookActivity extends Activity {
 		setContentView(new View(this));
 		TheFacebook f = TheFacebook.getInstance();
 		f.getmFacebook().authorize(this,
-				new String[] {"publish_stream", "read_stream", "offline_access"}, 
+				new String[] {"publish_stream", "read_stream"}, //"offline_access" 
 				f.new AuthDialogListener());
 	}
 

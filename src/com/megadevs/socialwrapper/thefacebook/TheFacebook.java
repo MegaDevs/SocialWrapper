@@ -27,7 +27,6 @@ import com.facebook.android.Util;
 import com.megadevs.socialwrapper.SocialFriend;
 import com.megadevs.socialwrapper.SocialNetwork;
 import com.megadevs.socialwrapper.SocialSessionStore;
-import com.megadevs.socialwrapper.SocialWrapper;
 import com.megadevs.socialwrapper.exceptions.InvalidAuthenticationException;
 import com.megadevs.socialwrapper.exceptions.InvalidSocialRequestException;
 
@@ -49,8 +48,6 @@ public class TheFacebook extends SocialNetwork {
 	private Activity mActivity;
 
 	private String appID;
-	private String accessToken;
-	private long accessExpires;
 
 	// keys for data storing
 	private final String appIDKey = "app_id";
@@ -79,9 +76,8 @@ public class TheFacebook extends SocialNetwork {
 		this.id = id;
 		iAmTheFacebook = this;
 		mActivity = a;
-		context = mActivity.getApplicationContext();
 
-		SocialNetwork.tag = "SocialWrapper-Facebook";
+		tag = "SocialWrapper-Facebook";
 	}
 
 	/**
@@ -100,19 +96,22 @@ public class TheFacebook extends SocialNetwork {
 	 * is completed.
 	 * @param id the application id provided by Facebook
 	 */
-	public void setAppID(String id) {
+	public void init(String id) {
 		appID = id;
 		mFacebook = new Facebook(appID);
-		mAsyncRunner = new AsyncFacebookRunner(mFacebook);
 
 		// try to restore a previously saved session
-		SocialSessionStore.restore(SocialWrapper.FACEBOOK, this, context);
+		SocialSessionStore.restore(this.id, this, mActivity);
+
+		// must be done after the restore, otherwise it would be created
+		// on a Facebook object which has no (potentially) valid access token
+		mAsyncRunner = new AsyncFacebookRunner(mFacebook);
 	}
 
 	@Override
 	public Vector<String[]> getConnectionData() {
 		Vector<String[]> data = new Vector<String[]>();
-		data.add(new String[] {appIDKey, accessTokenKey});
+		data.add(new String[] {appIDKey, appID});
 		data.add(new String[] {accessTokenKey, mFacebook.getAccessToken()});
 		data.add(new String[] {accessExpiresKey, String.valueOf(mFacebook.getAccessExpires())});
 		return data;
@@ -122,13 +121,13 @@ public class TheFacebook extends SocialNetwork {
 	protected void setConnectionData(Map<String, String> connectionData) {
 		if (connectionData.size()==0) {
 			this.connectionData = null;
-			accessToken = "";
-			accessExpires = -1;
 		}
 		else {
 			appID = connectionData.get(appIDKey);
-			accessToken = connectionData.get(accessTokenKey);
-			accessExpires = (Long.valueOf(connectionData.get(accessExpiresKey)).longValue());
+			String accessToken = connectionData.get(accessTokenKey);
+			Long accessExpires = (Long.valueOf(connectionData.get(accessExpiresKey)).longValue());
+
+			// restoring data
 			mFacebook.setAccessToken(accessToken);
 			mFacebook.setAccessExpires(accessExpires);
 		}
@@ -151,10 +150,9 @@ public class TheFacebook extends SocialNetwork {
 
 	@Override
 	public void deauthenticate() {
-		accessToken = "";
-		accessExpires = -1;
-		// simply erases any previously stored session in the prefs
-		SocialSessionStore.clear(SocialWrapper.FACEBOOK, context);
+		mAsyncRunner.logout(mActivity, new LogoutListener());
+		SocialSessionStore.clear(id, mActivity);
+		
 	}
 
 	/**
@@ -217,18 +215,23 @@ public class TheFacebook extends SocialNetwork {
 
 	@Override
 	public String getAccessToken() {
-		if (accessToken != null && accessToken != "")
-			return accessToken;
-
-		return "";
+		if (mFacebook != null)
+			return mFacebook.getAccessToken();
+		else return null;
 	}
 
 	@Override
 	public boolean isAuthenticated() {
-		if (accessToken != null && accessToken != "") return true;
+		if (mFacebook != null)
+			return mFacebook.isSessionValid();
 		else return false;
 	}
 
+	@Override
+	public String getId() {
+		return this.id;
+	}
+	
 	/**
 	 * Sets the profile picture size for each friend returned from the
 	 * 'getFriendsList' method.
@@ -276,7 +279,7 @@ public class TheFacebook extends SocialNetwork {
 			connectionData.put(accessExpiresKey, String.valueOf(mFacebook.getAccessExpires()));
 
 			// the valid session is saved in the app prefs
-			SocialSessionStore.save(SocialWrapper.FACEBOOK, iAmTheFacebook, context);
+			System.out.println(SocialSessionStore.save(TheFacebook.this.id, TheFacebook.this, mActivity));
 			actionResult = SocialNetwork.ACTION_SUCCESSFUL;
 
 			if (loginCallback != null) {
@@ -350,20 +353,22 @@ public class TheFacebook extends SocialNetwork {
 
 		public void onFacebookError(FacebookError e) {
 			TheFacebook.this.setActionResult(SocialNetwork.SOCIAL_NETWORK_ERROR,null);
-			forwardResult();
 			Log.d(tag, SocialNetwork.SOCIAL_NETWORK_ERROR, e);
+			e.printStackTrace();
+			forwardResult();
 		}
 
 		public void onError(DialogError e) {
 			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR,null);
-			forwardResult();
 			Log.d(tag, SocialNetwork.GENERAL_ERROR, e);   
+			e.printStackTrace();
+			forwardResult();
 		}
 
 		public void onCancel() {
 			TheFacebook.this.setActionResult(SocialNetwork.ACTION_CANCELED,null);
-			forwardResult();
 			Log.d(tag, SocialNetwork.ACTION_CANCELED);
+			forwardResult();
 		}
 	}
 
@@ -380,26 +385,61 @@ public class TheFacebook extends SocialNetwork {
 
 		public void onFacebookError(FacebookError e, final Object state) {
 			TheFacebook.this.setActionResult(SocialNetwork.SOCIAL_NETWORK_ERROR,null);
-			forwardResult();
 			Log.d(tag, SocialNetwork.SOCIAL_NETWORK_ERROR, e);
+			e.printStackTrace();
+			forwardResult();
 		}
 
 		public void onFileNotFoundException(FileNotFoundException e, final Object state) {
 			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR,e);
-			forwardResult();
 			Log.d(tag, SocialNetwork.GENERAL_ERROR, e);
+			e.printStackTrace();
+			forwardResult();
 		}
 
 		public void onIOException(IOException e, final Object state) {
 			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR,e);
-			forwardResult();
 			Log.d(tag, SocialNetwork.GENERAL_ERROR, e);
+			e.printStackTrace();
+			forwardResult();
 		}
 
 		public void onMalformedURLException(MalformedURLException e, final Object state) {
 			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR,e);
-			forwardResult();
 			Log.d(tag, SocialNetwork.GENERAL_ERROR, e);
+			e.printStackTrace();
+			forwardResult();
 		}
 	}
+	
+    public class LogoutListener implements RequestListener {
+
+		@Override
+		public void onComplete(String response, Object state) {
+			System.out.println("you have now logged out");
+		}
+
+		@Override
+		public void onIOException(IOException e, Object state) {
+			e.printStackTrace();
+		}
+
+		@Override
+		public void onFileNotFoundException(FileNotFoundException e,
+				Object state) {
+			e.printStackTrace();
+		}
+
+		@Override
+		public void onMalformedURLException(MalformedURLException e,
+				Object state) {
+			e.printStackTrace();
+		}
+
+		@Override
+		public void onFacebookError(FacebookError e, Object state) {
+			e.printStackTrace();
+		}
+    }
+
 }

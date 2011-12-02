@@ -90,7 +90,7 @@ public class TheTwitter extends SocialNetwork {
 	}
 
 	public static void deletePropers() {
-		Log.i(tag, "elimino l'istanza di twitter che ho istanziato non autenticata");
+		//Log.i(tag, "elimino l'istanza di twitter che ho istanziato non autenticata");
 		twitter = null;
 	}
 
@@ -257,5 +257,10 @@ public class TheTwitter extends SocialNetwork {
 			return true;
 		else
 			return false;
+	}
+	
+	@Override
+	public String getId() {
+		return this.id;
 	}
 }

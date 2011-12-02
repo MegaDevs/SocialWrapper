@@ -46,7 +46,7 @@ public class SocialSessionStore {
 
 		SharedPreferences savedSession =
 			context.getSharedPreferences(socialKey, Context.MODE_PRIVATE);
-			
+		
 		session.setConnectionData((Map<String, String>) savedSession.getAll());
 	}
 

@@ -60,7 +60,7 @@ public class TheFoursquare extends SocialNetwork {
 		mActivity = a;
 		iAmTheFoursquare = this;
 		
-		SocialNetwork.tag = "SocialWrapper-Foursquare";
+		tag = "SocialWrapper-Foursquare";
 	}
 
 	/**
@@ -266,6 +266,11 @@ public class TheFoursquare extends SocialNetwork {
 		else return false;
 	}
 
+	@Override
+	public String getId() {
+		return this.id;
+	}
+	
 	public void setActionResult(String result) {actionResult = result;}
 	
 	///

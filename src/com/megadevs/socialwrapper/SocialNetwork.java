@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Vector;
 
-import android.content.Context;
-
 import com.megadevs.socialwrapper.exceptions.InvalidAuthenticationException;
 import com.megadevs.socialwrapper.exceptions.InvalidSocialRequestException;
 import com.megadevs.socialwrapper.exceptions.NetworkErrorException;
@@ -21,12 +19,11 @@ public abstract class SocialNetwork {
 	
 	protected String id;
 	protected Map<String, String> connectionData;
-	protected Context context;
 	protected String actionResult;
 	// it may be null
 	protected Exception actionException;
 	
-	public static String tag;
+	public String tag;
 
 	public static final String ACTION_SUCCESSFUL = "Action successfully performed";
 	public static final String GENERAL_ERROR = "General error, check logs";
@@ -77,7 +74,7 @@ public abstract class SocialNetwork {
 	 */
 	public abstract String getAccessToken();
 	
-	public String getId() {return id;}
+	public abstract String getId();
 	
 	public abstract boolean isAuthenticated();
 	
