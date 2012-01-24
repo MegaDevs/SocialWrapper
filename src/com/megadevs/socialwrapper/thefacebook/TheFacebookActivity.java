@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
+
 /**
  * This activity is intended to be used only for the authentication sequence. It is
  * needed because of the callback mechanism of the Facebook-Android-SDK which is

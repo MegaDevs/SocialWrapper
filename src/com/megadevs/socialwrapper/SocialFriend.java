@@ -2,6 +2,7 @@ package com.megadevs.socialwrapper;
 
 import java.io.Serializable;
 
+
 /**
  * This class models the concept of 'friend'/'follower' in a social network environment.
  * Each friend is identified by an ID (which varies with regard to the considered social

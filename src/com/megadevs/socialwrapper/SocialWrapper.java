@@ -64,7 +64,8 @@ public class SocialWrapper {
 				return fb;
 			}
 			if (id.equals(TWITTER)) {
-				TheTwitter tw = new TheTwitter(id, mActivity);
+				TheTwitter tw = new TheTwitter();
+				tw.initTheTwitter(id, mActivity, "", "");
 				socialNetworks.put(TWITTER, tw);
 				return tw;
 			}

@@ -16,12 +16,6 @@
 
 package com.jiramot.foursquare.android;
 
-/**
- * Encapsulation of Foursquare.
- *
- * @author jiramot@gmail.com
- */
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 
@@ -31,6 +25,13 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
+
+/**
+ * Encapsulation of Foursquare.
+ *
+ * @author jiramot@gmail.com
+ */
+
 
 public class Foursquare {
 

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
+
 /**
  * This class is used to store the various social networks' data, such as access tokens,
  * ids and so on. This data is stored in the application's prefs. 

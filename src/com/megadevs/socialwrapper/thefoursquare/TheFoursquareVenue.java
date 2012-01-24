@@ -5,6 +5,7 @@ package com.megadevs.socialwrapper.thefoursquare;
 
 import com.google.android.maps.GeoPoint;
 
+
 /**
  * @author dextor
  *
