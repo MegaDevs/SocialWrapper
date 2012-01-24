@@ -16,6 +16,7 @@ import twitter4j.auth.RequestToken;
 import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,10 +32,10 @@ import com.megadevs.socialwrapper.exceptions.InvalidSocialRequestException;
 
 public class TheTwitter extends SocialNetwork {
 
-	public static String consumerKey = "";
-	public static String consumerSecret = "";
+	private String consumerKey = "";
+	private String consumerSecret = "";
 
-	private final String CALLBACKURL = "T4JOAuth://main";
+	private String callbackURL = "T4JOAuth://main";
 
 	private final String accessTokenKey = "accessTokenKey";
 	private final String accessTokenSecretKey = "accessTokenSecretKey";
@@ -62,15 +63,22 @@ public class TheTwitter extends SocialNetwork {
 	 * @param secret
 	 * @param key
 	 */
-	public void initTheTwitter(String id, Activity activity, String secret, String key) {
+	public TheTwitter(String id, Activity activity) {
 		myTwitter = this;
 		mActivity = activity;
-		context = mActivity.getApplicationContext();
 		tag = "Corso12-Social-Twitter";
-		if(secret != "" && key != "")
-			setConsumerSecretAndKey(secret, key);
 	}
 
+	public void setParameters(String key, String secret, String callback) {
+		consumerKey = key;
+		consumerSecret = secret;
+		callbackURL = callback;
+		
+		if(secret != "" && key != "")
+			setConsumerSecretAndKey(secret, key);
+
+	}
+	
 	/**
 	 * Set the consumerSecret and consumerKey and init the twitterFactory
 	 * 
@@ -175,7 +183,7 @@ public class TheTwitter extends SocialNetwork {
 				Log.i(tag, "Effettuo il logIn via WebView");
 				twitter = twitterFactory.getInstance();
 				System.out.println("ciao ciao ciao ciao ciao ciao");
-				System.out.println("CALLBACKURL     " + CALLBACKURL);
+				System.out.println("CALLBACKURL     " + callbackURL);
 				if(twitter == null)
 					System.out.println("nnnnuuuuuuuuuuuuuulllllllllllllll");
 				else
@@ -430,7 +438,6 @@ public class TheTwitter extends SocialNetwork {
 				return true;
 		return false;
 	}
-}
 
 
 /*

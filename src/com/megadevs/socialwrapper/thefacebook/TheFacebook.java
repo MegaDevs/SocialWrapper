@@ -48,8 +48,6 @@ public class TheFacebook extends SocialNetwork {
 	private Activity mActivity;
 
 	private String appID;
-	private String accessToken = "";
-	private long accessExpires;
 
 	// keys for data storing
 	private final String appIDKey = "app_id";
