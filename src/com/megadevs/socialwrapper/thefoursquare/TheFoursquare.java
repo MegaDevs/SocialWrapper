@@ -16,7 +16,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.google.android.maps.GeoPoint;
 import com.jiramot.foursquare.android.Foursquare;
 import com.megadevs.socialwrapper.SocialFriend;
 import com.megadevs.socialwrapper.SocialNetwork;
@@ -180,17 +179,15 @@ public class TheFoursquare extends SocialNetwork {
 	 * @return an ArrayList of nearby venues
 	 * @throws InvalidSocialRequestException
 	 */
-	public ArrayList<TheFoursquareVenue> searchVenues(GeoPoint position, String venue) throws InvalidSocialRequestException {
-		int longitude = position.getLongitudeE6();
-		int latitude = position.getLatitudeE6();
-		String ll = String.valueOf(longitude) + "," + String.valueOf(latitude);
+	public ArrayList<TheFoursquareVenue> searchVenues(double latitude, double longitude, String venue) throws InvalidSocialRequestException {
+		String ll = String.valueOf(latitude) + "," + String.valueOf(longitude);
 		
 		Bundle b = new Bundle();
 		b.putString("ll", ll);
 		
 		// eventually a query name is passed, along with the geoposition
-//		if (venue != null)
-//			b.putString("query", venue);
+		if (venue != null)
+			b.putString("query", venue);
 		
 		// venues are searchable even if no user is logged in
 		if (!isAuthenticated()) {

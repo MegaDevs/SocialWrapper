@@ -3,19 +3,18 @@
  */
 package com.megadevs.socialwrapper.thefoursquare;
 
-import com.google.android.maps.GeoPoint;
-
-
 /**
  * @author dextor
  *
  */
-public class TheFoursquareVenue extends GeoPoint {
+public class TheFoursquareVenue {
 
 	// the Foursquare-assigned ID
 	private String venueID;
 	private String venueName;
 	private String venueDistance;
+	private double latitude;
+	private double longitude;
 	
 	/**
 	 * Default constructor for a TheFoursquareVenue object.
@@ -25,10 +24,11 @@ public class TheFoursquareVenue extends GeoPoint {
 	 * @param id Foursquare ID of the venue
 	 * @param name Foursquare name of the venue
 	 */
-	public TheFoursquareVenue(int latitudeE6, int longitudeE6, String id, String name, int distance) {
-		super(latitudeE6, longitudeE6);
+	public TheFoursquareVenue(double latitude, double longitude, String id, String name, int distance) {
 		venueID = id;
 		venueName = name;
+		this.latitude = latitude;
+		this.longitude = longitude;
 	}
 	/**
 	 * @return the venueID
@@ -47,6 +47,18 @@ public class TheFoursquareVenue extends GeoPoint {
 	 */
 	public String getVenueDistance() {
 		return venueDistance;
+	}
+	/**
+	 * @return the latitude
+	 */
+	public double getLatitude() {
+		return latitude;
+	}
+	/**
+	 * @return the longitude
+	 */
+	public double getLongitude() {
+		return longitude;
 	}
 
 }
