@@ -222,8 +222,8 @@ public class TheFoursquare extends SocialNetwork {
 				venues.add(new TheFoursquareVenue(
 						Float.valueOf(lat).intValue(),
 						Float.valueOf(lon).intValue(),
-						name,
-						id, 
+						id,
+						name, 
 						Integer.valueOf(dist).intValue()));
 			}
 			
