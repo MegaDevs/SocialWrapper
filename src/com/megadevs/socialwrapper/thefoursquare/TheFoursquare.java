@@ -3,6 +3,7 @@ package com.megadevs.socialwrapper.thefoursquare;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Map;
 import java.util.Vector;
 
@@ -38,10 +39,12 @@ public class TheFoursquare extends SocialNetwork {
 	private Activity mActivity;
 
 	private String clientID;
+	private String clientSecret;
 	private String callbackURL;
 	private String accessToken;
 	
 	public final String clientIDKey = "client_id";
+	public final String clientSecretKey = "client_secret";
 	public final String callbackURLKey = "callback_url";
 	public final String accessTokenKey = "access_token";
 	
@@ -79,8 +82,9 @@ public class TheFoursquare extends SocialNetwork {
 	 * only after this action is completed.
 	 * @param id the application id provided by Foursquare
 	 */
-	public void setFSParams(String id, String url) {
+	public void setFSParams(String id, String secret, String url) {
 		clientID = id;
+		clientSecret = secret;
 		callbackURL = url;
 		
 		mFoursquare = new Foursquare(clientID, callbackURL);
@@ -134,6 +138,7 @@ public class TheFoursquare extends SocialNetwork {
 	protected Vector<String[]> getConnectionData() {
 		Vector<String[]> data = new Vector<String[]>();
 		data.add(new String[] {clientIDKey, clientID});
+		data.add(new String[] {clientSecretKey, clientSecret});
 		data.add(new String[] {accessTokenKey, accessToken});
 		data.add(new String[] {callbackURLKey, callbackURL});
 		
@@ -147,6 +152,7 @@ public class TheFoursquare extends SocialNetwork {
 		}
 		else {
 			clientID = connectionData.get(clientIDKey);
+			clientSecret = connectionData.get(clientSecretKey);
 			callbackURL = connectionData.get(callbackURLKey);
 			accessToken = connectionData.get(accessTokenKey);
 			
@@ -181,6 +187,15 @@ public class TheFoursquare extends SocialNetwork {
 		
 		Bundle b = new Bundle();
 		b.putString("ll", ll);
+		
+		// venues are searchable even if no user is logged in
+		if (!isAuthenticated()) {
+			b.putString(clientIDKey, clientID);
+			b.putString(clientSecretKey, clientSecret);
+			Calendar c = Calendar.getInstance();
+			String date = String.valueOf(c.get(Calendar.YEAR)) + String.valueOf(c.get(Calendar.MONTH)) + String.valueOf(c.get(Calendar.DAY_OF_MONTH));
+			b.putString("v", date);
+		}
 
 		ArrayList<TheFoursquareVenue> venues = null;
 		try {

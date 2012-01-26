@@ -3,7 +3,6 @@ package com.megadevs.socialwrapper.thefacebook;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.ref.PhantomReference;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -201,16 +200,44 @@ public class TheFacebook extends SocialNetwork {
 	public void postPicture(Bitmap b, SocialBaseCallback s) {
 		pictureCallback = (TheFacebookPictureCallback) s;
 		byte[] data = null;
-
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		b.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+		boolean compressed = b.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+		System.out.println("image is " + (compressed?"compressed":"not compressed"));
 		data = baos.toByteArray();
+		
+//		File f = new File("/sdcard/test2.jpg");
+//		byte[] data = new byte[(int) f.length()];
+//		FileInputStream fis;
+//		try {
+//			fis = new FileInputStream(f);
+//			fis.read(data);
+//			fis.close();
+//		} catch (FileNotFoundException e) {
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//	
+		if (data.length != 0) {
+			System.out.println("insider");
+			Bundle params = new Bundle();
+			params.putString("method", "photos.upload");
+			params.putString("app_key", appID);
+//			params.putString("format", "JPG");
+			params.putByteArray("picture", data);
+	
+			mAsyncRunner.request(null, params, "POST", new PostPictureListener(), null);
+		}
 
-		Bundle params = new Bundle();
-		params.putString("method", "photos.upload");
-		params.putByteArray("picture", data);
+		
+//		data = baos.toByteArray();
 
-		mAsyncRunner.request(null, params, "POST", new PostPictureListener(), null);
+//		Bundle params = new Bundle();
+//		params.putString("method", "photos.upload");
+//		params.putByteArray("picture", data);
+//
+//		mAsyncRunner.request(null, params, "POST", new PostPictureListener(), null);
 
 	}
 	
