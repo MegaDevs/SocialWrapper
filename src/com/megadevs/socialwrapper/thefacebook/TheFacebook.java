@@ -1,7 +1,9 @@
 package com.megadevs.socialwrapper.thefacebook;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.ref.PhantomReference;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +16,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -65,6 +68,7 @@ public class TheFacebook extends SocialNetwork {
 	private TheFacebookLoginCallback loginCallback;
 	private TheFacebookPostCallback postCallback;
 	private TheFacebookFriendListCallback friendslistCallback;
+	private TheFacebookPictureCallback pictureCallback;
 
 	/**
 	 * Default constructor for TheFacebook class. A context is
@@ -194,6 +198,22 @@ public class TheFacebook extends SocialNetwork {
 	}
 
 
+	public void postPicture(Bitmap b, SocialBaseCallback s) {
+		pictureCallback = (TheFacebookPictureCallback) s;
+		byte[] data = null;
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		b.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+		data = baos.toByteArray();
+
+		Bundle params = new Bundle();
+		params.putString("method", "photos.upload");
+		params.putByteArray("picture", data);
+
+		mAsyncRunner.request(null, params, "POST", new PostPictureListener(), null);
+
+	}
+	
 	/**
 	 * This method is used to let the listeners' implementations
 	 * post their result message: the 'actionResult' field will be
@@ -248,6 +268,7 @@ public class TheFacebook extends SocialNetwork {
 	public static abstract class TheFacebookLoginCallback implements SocialBaseCallback {
 		public abstract void onLoginCallback(String result);
 		public void onPostCallback(String result) {};
+		public void onPostPictureCallback(String result) {};
 		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
 		public abstract void onErrorCallback(String error); 
 	}
@@ -255,6 +276,7 @@ public class TheFacebook extends SocialNetwork {
 	public static abstract class TheFacebookPostCallback implements SocialBaseCallback {
 		public void onLoginCallback(String result) {};
 		public abstract void onPostCallback(String result);
+		public void onPostPictureCallback(String result) {};
 		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
 		public abstract void onErrorCallback(String error);
 	}
@@ -262,8 +284,18 @@ public class TheFacebook extends SocialNetwork {
 	public static abstract class TheFacebookFriendListCallback implements SocialBaseCallback {
 		public void onLoginCallback(String result) {};
 		public void onPostCallback(String result) {};
+		public void onPostPictureCallback(String result) {};
 		public abstract void onFriendsListCallback(String result, ArrayList<SocialFriend> list);
 		public abstract void onErrorCallback(String error);
+	}
+	
+	public static abstract class TheFacebookPictureCallback implements SocialBaseCallback {
+		public void onLoginCallback(String result) {};
+		public void onPostCallback(String result) {};
+		public abstract void onPostPictureCallback(String result);
+		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
+		public abstract void onErrorCallback(String error);
+
 	}
 	
 	// needs to have package visibility, otherwise TheFacebookActivity cannot perform the login process
@@ -336,6 +368,21 @@ public class TheFacebook extends SocialNetwork {
 		}
 	}
 
+	
+	private class PostPictureListener extends TheFacebookBaseRequestListener {
+
+		@Override
+		public void onComplete(String response, Object state) {
+			actionResult = ACTION_SUCCESSFUL;
+
+			if (pictureCallback != null) {
+				pictureCallback.onPostPictureCallback(actionResult);
+				pictureCallback = null;
+			}
+		}
+
+	}
+	
 	///
 	///	LISTENERS >ABSTRACT< CLASSES, PRIVATE ACCESS
 	///

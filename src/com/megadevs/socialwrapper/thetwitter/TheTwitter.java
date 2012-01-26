@@ -64,6 +64,7 @@ public class TheTwitter extends SocialNetwork {
 	 * @param key
 	 */
 	public TheTwitter(String id, Activity activity) {
+		this.id = id;
 		myTwitter = this;
 		mActivity = activity;
 		tag = "Corso12-Social-Twitter";

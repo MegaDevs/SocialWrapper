@@ -179,4 +179,13 @@ public class FoursquareDialog extends Dialog {
 		}
 
 	}
+
+	/* (non-Javadoc)
+	 * @see android.app.Dialog#onBackPressed()
+	 */
+	@Override
+	public void onBackPressed() {
+		this.dismiss();
+		mListener.onCancel();
+	}
 }
