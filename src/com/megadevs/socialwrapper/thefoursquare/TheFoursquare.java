@@ -189,32 +189,38 @@ public class TheFoursquare extends SocialNetwork {
 		b.putString("ll", ll);
 		
 		// eventually a query name is passed, along with the geoposition
-		if (venue != null)
-			b.putString("query", venue);
+//		if (venue != null)
+//			b.putString("query", venue);
 		
 		// venues are searchable even if no user is logged in
 		if (!isAuthenticated()) {
 			b.putString(clientIDKey, clientID);
 			b.putString(clientSecretKey, clientSecret);
 			Calendar c = Calendar.getInstance();
-			String date = String.valueOf(c.get(Calendar.YEAR)) + String.valueOf(c.get(Calendar.MONTH)) + String.valueOf(c.get(Calendar.DAY_OF_MONTH));
+			
+			// Calendar.MONTH starts from 0, so a little hack is needed
+			String month;
+			if (c.get(Calendar.MONTH) < 10)
+				month = "0" + String.valueOf(c.get(Calendar.MONTH));
+			else
+				month = String.valueOf(c.get(Calendar.MONTH));
+			String date = String.valueOf(c.get(Calendar.YEAR)) + month + String.valueOf(c.get(Calendar.DAY_OF_MONTH));
 			b.putString("v", date);
 		}
 
-		ArrayList<TheFoursquareVenue> venues = null;
+		ArrayList<TheFoursquareVenue> foursquareVenues = null;
 		try {
 			String result = mFoursquare.request("venues/search", b);
+			System.out.println(result);
 			
 			// parsing the request result
 			JSONObject obj = new JSONObject(result);
 			JSONObject response = obj.getJSONObject("response");
-			JSONArray groups = response.getJSONArray("groups");
-			JSONObject element = groups.getJSONObject(0);
-			JSONArray items = element.getJSONArray("items");
+			JSONArray venues = response.getJSONArray("venues");
 			
-			venues = new ArrayList<TheFoursquareVenue>(items.length());
-			for (int i=0; i<items.length(); i++) {
-				JSONObject item = items.getJSONObject(i);
+			foursquareVenues = new ArrayList<TheFoursquareVenue>(venues.length());
+			for (int i=0; i<venues.length(); i++) {
+				JSONObject item = venues.getJSONObject(i);
 				String id = item.getString("id");
 				String name = item.getString("name");
 				
@@ -223,7 +229,7 @@ public class TheFoursquare extends SocialNetwork {
 				String lon = location.getString("lng");
 				String dist = location.getString("distance");
 				
-				venues.add(new TheFoursquareVenue(
+				foursquareVenues.add(new TheFoursquareVenue(
 						Float.valueOf(lat).intValue(),
 						Float.valueOf(lon).intValue(),
 						id,
@@ -238,7 +244,22 @@ public class TheFoursquare extends SocialNetwork {
 		} catch (JSONException e) {
 			throw new InvalidSocialRequestException("Could not retrieve the nearby venues", e);
 		}
-		return venues;
+		return foursquareVenues;
+	}
+	
+	public void checkIn(TheFoursquareVenue venue) {
+		Bundle b = new Bundle();
+		b.putString("venueId", venue.getVenueID());
+		
+		try {
+			mFoursquare.request("checkins/add",b);
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
