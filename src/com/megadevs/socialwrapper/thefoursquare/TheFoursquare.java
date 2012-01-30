@@ -201,6 +201,7 @@ public class TheFoursquare extends SocialNetwork {
 				month = "0" + String.valueOf(c.get(Calendar.MONTH));
 			else
 				month = String.valueOf(c.get(Calendar.MONTH));
+			
 			String date = String.valueOf(c.get(Calendar.YEAR)) + month + String.valueOf(c.get(Calendar.DAY_OF_MONTH));
 			b.putString("v", date);
 		}
@@ -251,10 +252,8 @@ public class TheFoursquare extends SocialNetwork {
 		try {
 			mFoursquare.request("checkins/add",b);
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

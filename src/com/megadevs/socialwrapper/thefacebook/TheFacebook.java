@@ -1,6 +1,5 @@
 package com.megadevs.socialwrapper.thefacebook;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -15,7 +14,6 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -197,48 +195,16 @@ public class TheFacebook extends SocialNetwork {
 	}
 
 
-	public void postPicture(Bitmap b, SocialBaseCallback s) {
+	public void postPicture(byte[] image, String description, SocialBaseCallback s) {
 		pictureCallback = (TheFacebookPictureCallback) s;
-		byte[] data = null;
 		
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		boolean compressed = b.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-		System.out.println("image is " + (compressed?"compressed":"not compressed"));
-		data = baos.toByteArray();
-		
-//		File f = new File("/sdcard/test2.jpg");
-//		byte[] data = new byte[(int) f.length()];
-//		FileInputStream fis;
-//		try {
-//			fis = new FileInputStream(f);
-//			fis.read(data);
-//			fis.close();
-//		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//	
-		if (data.length != 0) {
-			System.out.println("insider");
+		if (image.length != 0) {
 			Bundle params = new Bundle();
-			params.putString("method", "photos.upload");
-			params.putString("app_key", appID);
-//			params.putString("format", "JPG");
-			params.putByteArray("picture", data);
-	
-			mAsyncRunner.request(null, params, "POST", new PostPictureListener(), null);
+			params.putString("name", description);
+			params.putByteArray("source", image);
+			
+			mAsyncRunner.request("me/photos", params, "POST", new PostPictureListener(), null);
 		}
-
-		
-//		data = baos.toByteArray();
-
-//		Bundle params = new Bundle();
-//		params.putString("method", "photos.upload");
-//		params.putByteArray("picture", data);
-//
-//		mAsyncRunner.request(null, params, "POST", new PostPictureListener(), null);
-
 	}
 	
 	/**
@@ -400,6 +366,8 @@ public class TheFacebook extends SocialNetwork {
 
 		@Override
 		public void onComplete(String response, Object state) {
+			System.out.println("response="+response);
+			System.out.println("state="+state);
 			actionResult = ACTION_SUCCESSFUL;
 
 			if (pictureCallback != null) {
@@ -423,6 +391,8 @@ public class TheFacebook extends SocialNetwork {
 				postCallback.onErrorCallback(actionResult);
 			else if (friendslistCallback != null)
 				friendslistCallback.onErrorCallback(actionResult);
+			else if (pictureCallback != null)
+				pictureCallback.onErrorCallback(actionResult);
 		}
 
 		public void onFacebookError(FacebookError e) {
@@ -455,6 +425,8 @@ public class TheFacebook extends SocialNetwork {
 				postCallback.onErrorCallback(actionResult);
 			else if (friendslistCallback != null)
 				friendslistCallback.onErrorCallback(actionResult);
+			else if (pictureCallback != null)
+				pictureCallback.onErrorCallback(actionResult);
 		}
 
 		public void onFacebookError(FacebookError e, final Object state) {
