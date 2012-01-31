@@ -1,9 +1,9 @@
 package com.megadevs.socialwrapper.thefoursquare;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Map;
 import java.util.Vector;
 
@@ -23,6 +23,9 @@ import com.megadevs.socialwrapper.SocialSessionStore;
 import com.megadevs.socialwrapper.SocialWrapper;
 import com.megadevs.socialwrapper.exceptions.InvalidAuthenticationException;
 import com.megadevs.socialwrapper.exceptions.InvalidSocialRequestException;
+import com.megadevs.socialwrapper.utils.HTTPPostParameters;
+import com.megadevs.socialwrapper.utils.HTTPResult;
+import com.megadevs.socialwrapper.utils.Utils;
 
 /**
  * This class models a personal Foursquare object. With an instance of 
@@ -50,7 +53,9 @@ public class TheFoursquare extends SocialNetwork {
 	// static callback refs
 	private TheFoursquareLoginCallback loginCallback;
 	private TheFoursquareFriendListCallback friendslistCallback;
-
+	private TheFoursquareSearchCallback searchCallback;
+	private TheFoursquareCheckinCallback checkinCallback;
+	private TheFoursquarePostPictureCallback postPictureCallback;
 	
 	private ArrayList<SocialFriend> mFoursquareFriends;
 	/**
@@ -164,6 +169,12 @@ public class TheFoursquare extends SocialNetwork {
 			loginCallback.onErrorCallback(actionResult);
 		else if (friendslistCallback != null)
 			friendslistCallback.onErrorCallback(actionResult);
+		else if (searchCallback != null)
+			searchCallback.onErrorCallback(actionResult);
+		else if (checkinCallback != null)
+			checkinCallback.onErrorCallback(actionResult);
+		else if (postPictureCallback != null)
+			postPictureCallback.onErrorCallback(actionResult);
 	}
 
 	
@@ -184,6 +195,7 @@ public class TheFoursquare extends SocialNetwork {
 		
 		Bundle b = new Bundle();
 		b.putString("ll", ll);
+		b.putString("v", Utils.getCurrentDate());
 		
 		// eventually a query name is passed, along with the geoposition
 		if (venue != null)
@@ -193,17 +205,7 @@ public class TheFoursquare extends SocialNetwork {
 		if (!isAuthenticated()) {
 			b.putString(clientIDKey, clientID);
 			b.putString(clientSecretKey, clientSecret);
-			Calendar c = Calendar.getInstance();
-			
-			// Calendar.MONTH starts from 0, so a little hack is needed
-			String month;
-			if (c.get(Calendar.MONTH) < 10)
-				month = "0" + String.valueOf(c.get(Calendar.MONTH));
-			else
-				month = String.valueOf(c.get(Calendar.MONTH));
-			
-			String date = String.valueOf(c.get(Calendar.YEAR)) + month + String.valueOf(c.get(Calendar.DAY_OF_MONTH));
-			b.putString("v", date);
+			b.putString("v", Utils.getCurrentDate());
 		}
 
 		ArrayList<TheFoursquareVenue> foursquareVenues = null;
@@ -245,18 +247,118 @@ public class TheFoursquare extends SocialNetwork {
 		return foursquareVenues;
 	}
 	
-	public void checkIn(TheFoursquareVenue venue) {
-		Bundle b = new Bundle();
-		b.putString("venueId", venue.getVenueID());
+	
+	/**
+	 * Method that uploads a picture to Foursquare, given an image file (must be a JPG < 5MB)
+	 * and a valid checkin ID. Since the endpoint is a POST-only, a support HTTP library
+	 * is used in order to properly process the multipart request and the post parameters.
+	 * 
+	 * @param image JPG image to upload
+	 * @param id a valid checkin ID
+	 * @throws InvalidSocialRequestException 
+	 */
+	public void postPicture(File image, String id, SocialBaseCallback s) throws InvalidSocialRequestException {
+		postPictureCallback = (TheFoursquarePostPictureCallback) s;
+		String endpoint = "https://api.foursquare.com/v2/photos/add?";
+		
+		HTTPPostParameters params = new HTTPPostParameters();
+		params.addParam("checkinId", id);
+		params.addParam("file", image);
+
+		// manually adding access token and date (for API verification)
+		endpoint += "&oauth_token="+getAccessToken()+"&v="+Utils.getCurrentDate();
 		
 		try {
-			mFoursquare.request("checkins/add",b);
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			// parsing server response
+			HTTPResult r = Utils.executeHTTPUrlPost(endpoint, params, null);
+			Log.i(tag, "performed server call, parsing response..");
+
+			if (r != null && r.getData() != null) {
+				JSONObject obj = new JSONObject(r.getData());
+				obj = obj.getJSONObject("meta");
+				
+				if (obj.getString("code").contains("200")) {
+					Log.i(tag, "picture uploaded");
+					actionResult = ACTION_SUCCESSFUL;
+					postPictureCallback.onPostPictureCallback(actionResult);
+				} else {
+					actionResult = SOCIAL_NETWORK_ERROR;
+					forwardResult();
+				}
+
+				postPictureCallback = null;
+			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			postPictureCallback = null;
+			throw new InvalidSocialRequestException("Could not upload the photo", e);
+		} catch (JSONException e) {
+			postPictureCallback = null;
+			throw new InvalidSocialRequestException("Could not upload the photo", e);
 		}
 	}
+	
+	
+	/**
+	 * Method that performs a checkin in the current venue and may post a shout message
+	 * (if set). As for the postPicture() method, this is also a POST-only, so the
+	 * HTTP support library must be used again.
+	 * 
+	 * @param id
+	 * @return
+	 * @throws InvalidSocialRequestException 
+	 */
+	public void checkIn(String id, String message, SocialBaseCallback s) throws InvalidSocialRequestException {
+		checkinCallback = (TheFoursquareCheckinCallback) s;
+		Log.i(tag, "checkin");
+		String endpoint = "https://api.foursquare.com/v2/checkins/add?";
+		
+		HTTPPostParameters params = new HTTPPostParameters();
+		params.addParam("venueId", id);
+		params.addParam("shout", message);
+		
+		endpoint += "&oauth_token="+getAccessToken()+"&v="+Utils.getCurrentDate();
+		
+		try {
+			// parsing server response
+			HTTPResult r = Utils.executeHTTPUrlPost(endpoint, params, null);
+			Log.i(tag, "performed server call, parsing response..");
+			
+			// check if the checkin was successful			
+			JSONObject obj = new JSONObject(r.getData());
+			JSONArray notifications = obj.getJSONArray("notifications");
+			obj = notifications.getJSONObject(1);
+			obj = obj.getJSONObject("item");
+			String result = obj.getString("message");
+			
+			if (result.contains("OK!")) {
+				Log.i(tag, "checkin performed, returning its ID");
+
+				// retrieve checkin id
+				obj = new JSONObject(r.getData());
+				obj = obj.getJSONObject("response").getJSONObject("checkin");
+				String checkinId = obj.getString("id");
+				actionResult = ACTION_SUCCESSFUL;
+				checkinCallback.onCheckinCallback(result, checkinId);
+
+			} else {
+				actionResult = SOCIAL_NETWORK_ERROR;
+				forwardResult();
+			}
+
+			checkinCallback = null;
+		
+		} catch (MalformedURLException e) {
+			checkinCallback = null;
+			throw new InvalidSocialRequestException("Could not checkin", e);
+		} catch (IOException e) {
+			checkinCallback = null;
+			throw new InvalidSocialRequestException("Could not checkin", e);
+		} catch (JSONException e) {
+			checkinCallback = null;
+			throw new InvalidSocialRequestException("Could not checkin", e);
+		}
+	}
+	
 	
 	@Override
 	public void getFriendsList(SocialBaseCallback s) throws InvalidSocialRequestException {
@@ -316,6 +418,8 @@ public class TheFoursquare extends SocialNetwork {
 	public static abstract class TheFoursquareLoginCallback implements SocialBaseCallback {
 		public abstract void onLoginCallback(String result);
 		public void onSearchVenuesCallback(String result, ArrayList<TheFoursquareVenue> list) {};
+		public void onCheckinCallback(String result, String checkinId) {};
+		public void onPostPictureCallback(String result) {};
 		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
 		public abstract void onErrorCallback(String error); 
 	}
@@ -323,6 +427,7 @@ public class TheFoursquare extends SocialNetwork {
 	public static abstract class TheFoursquareSearchCallback implements SocialBaseCallback {
 		public void onLoginCallback(String result) {};
 		public abstract void onSearchVenuesCallback(String result, ArrayList<TheFoursquareVenue> list);
+		public void onCheckinCallback(String result, String checkinId) {};		public void onPostPictureCallback(String result) {};
 		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
 		public abstract void onErrorCallback(String error);
 	}
@@ -330,9 +435,27 @@ public class TheFoursquare extends SocialNetwork {
 	public static abstract class TheFoursquareFriendListCallback implements SocialBaseCallback {
 		public void onLoginCallback(String result) {};
 		public void onSearchVenuesCallback(String result, ArrayList<TheFoursquareVenue> list) {};
+		public void onCheckinCallback(String result, String checkinId) {};		public void onPostPictureCallback(String result) {};
 		public abstract void onFriendsListCallback(String result, ArrayList<SocialFriend> list);
 		public abstract void onErrorCallback(String error);
 	}
 
-	
+	public static abstract class TheFoursquarePostPictureCallback implements SocialBaseCallback {
+		public void onLoginCallback(String result) {};
+		public void onSearchVenuesCallback(String result, ArrayList<TheFoursquareVenue> list) {};
+		public void onCheckinCallback(String result, String checkinId) {};
+		public abstract void onPostPictureCallback(String result);
+		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
+		public abstract void onErrorCallback(String error); 
+	}
+
+	public static abstract class TheFoursquareCheckinCallback implements SocialBaseCallback {
+		public void onLoginCallback(String result) {};
+		public void onSearchVenuesCallback(String result, ArrayList<TheFoursquareVenue> list) {};
+		public abstract void onCheckinCallback(String result, String checkinId);
+		public void onPostPictureCallback(String result) {};
+		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
+		public abstract void onErrorCallback(String error); 
+	}
+
 }

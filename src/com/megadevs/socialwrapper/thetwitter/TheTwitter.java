@@ -3,7 +3,6 @@ package com.megadevs.socialwrapper.thetwitter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.Vector;
 
 import twitter4j.IDs;
@@ -17,7 +16,6 @@ import twitter4j.conf.ConfigurationBuilder;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -51,8 +49,6 @@ public class TheTwitter extends SocialNetwork {
 	private TheTwitterPostCallback postCallback;
 	private TheTwitterFriendListCallback friendslistCallback;
 
-	private Handler theHandler = new Handler();	
-
 	/**
 	 * You can set the consumerSecret and consumerKey later (set them equal "")
 	 * 
@@ -62,11 +58,10 @@ public class TheTwitter extends SocialNetwork {
 	 * @param key
 	 */
 	public TheTwitter(String id, Activity activity) {
-		System.out.println("TheTwitter");
 		this.id = id;
 		myTwitter = this;
 		mActivity = activity;
-		tag = "Corso12-Social-Twitter";
+		tag = "[SW-THETWITTER]";
 	}
 
 	public void setParameters(String key, String secret, String callback) {

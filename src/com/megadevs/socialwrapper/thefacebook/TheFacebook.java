@@ -78,7 +78,7 @@ public class TheFacebook extends SocialNetwork {
 		iAmTheFacebook = this;
 		mActivity = a;
 
-		tag = "SocialWrapper-Facebook";
+		tag = "[SW-THEFACEBOOK]";
 	}
 
 	/**
