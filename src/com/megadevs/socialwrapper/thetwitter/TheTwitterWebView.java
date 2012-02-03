@@ -65,27 +65,6 @@ public class TheTwitterWebView extends Activity {
 		});
 	}
 
-	@Override
-	protected void onNewIntent(Intent intent) {
-		super.onNewIntent(intent);
-
-		System.out.println("----------------00000000000----------------------------");
-		System.out.println("--------------00000000000000----------------");
-		System.out.println("---------------0000000000000-----------------------------");
-		System.out.println("----------------000000000---------------------------");
-		
-		if(intent.getScheme().equals("T4JOAuth")) {
-			Uri uri = intent.getData();
-			try {
-				String verifier = uri.getQueryParameter("oauth_verifier");
-				AccessToken accessToken = twitter.getOAuthAccessToken(requestToken, verifier);
-				TheTwitter.getTwitter().setPropersAccessToken(accessToken);
-				finish();			
-			} catch (TwitterException ex) {
-				Log.i(logTag, "Mah :-(", ex);
-			}
-		}
-	}
 
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
@@ -98,3 +77,26 @@ public class TheTwitterWebView extends Activity {
 		}
 	}
 }
+/*
+@Override
+protected void onNewIntent(Intent intent) {
+	super.onNewIntent(intent);
+	
+	System.out.println("----------------00000000000----------------------------");
+	System.out.println("--------------00000000000000----------------");
+	System.out.println("---------------0000000000000-----------------------------");
+	System.out.println("----------------000000000---------------------------");
+	
+	if(intent.getScheme().equals("T4JOAuth")) {
+		Uri uri = intent.getData();
+		try {
+			String verifier = uri.getQueryParameter("oauth_verifier");
+			AccessToken accessToken = twitter.getOAuthAccessToken(requestToken, verifier);
+			TheTwitter.getTwitter().setPropersAccessToken(accessToken);
+			finish();			
+		} catch (TwitterException ex) {
+			Log.i(logTag, "Mah :-(", ex);
+		}
+	}
+}
+*/
