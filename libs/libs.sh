@@ -3,18 +3,6 @@
 # enable shell extensions: this makes cleaning up very easy
 shopt -s extglob
 
-SCRIPT_NAME=`basename $0`
-TOBEKEPT=$SCRIPT_NAME"|android-support-v4.jar|armeabi|CWAC-AdapterWrapper.jar|CWAC-Bus.jar|CWAC-Cache.jar|CWAC-Endless.jar|CWAC-Task.jar"
-
-##############################
-# 			TWITTER			 #
-##############################
-
-TWITTER4J_DOWNLOAD_WEBSITE="http://twitter4j.org/en/"
-TWITTER4J_LATEST_RELEASE="twitter4j-android-2.2.5.zip"
-TWITTER4J_DESIRED_LIB="core"
-TWITTER4J_TEMP_VARIABLE=${TWITTER4J_LATEST_RELEASE/-/-core-}
-TWITTER4J_CORE_LIB=${TWITTER4J_TEMP_VARIABLE/.zip/.jar}
 
 echo "
 #######################################################
@@ -27,6 +15,19 @@ echo "
 #                     MegaDevs®                       #
 #                                                     #
 #######################################################"
+
+SCRIPT_NAME=`basename $0`
+TOBEKEPT=$SCRIPT_NAME"|android-support-v4.jar|armeabi|CWAC-AdapterWrapper.jar|CWAC-Bus.jar|CWAC-Cache.jar|CWAC-Endless.jar|CWAC-Task.jar"
+
+##############################
+# 			TWITTER			 #
+##############################
+
+TWITTER4J_DOWNLOAD_WEBSITE="http://twitter4j.org/en/"
+TWITTER4J_LATEST_RELEASE="twitter4j-android-2.2.5.zip"
+TWITTER4J_DESIRED_LIB="core"
+TWITTER4J_TEMP_VARIABLE=${TWITTER4J_LATEST_RELEASE/-/-core-}
+TWITTER4J_CORE_LIB=${TWITTER4J_TEMP_VARIABLE/.zip/.jar}
 
 echo '---------------------'
 echo 'Checking for Twitter libs..'
@@ -91,9 +92,27 @@ else
 	echo -e 'Tumblr successfully downloaded. Moving to next library.. \n'
 fi
 
-# add ASAP
-# http://code.google.com/p/flickrj-android/downloads/detail?name=flickrj-android-1.0.1.20111224194607.jar&can=2&q=
-# http://www.slf4j.org/android/slf4j-android-1.6.1-RC1.jar
+##############################
+# 			FLICKR			 #
+##############################
+
+echo '---------------------'
+echo 'Checking for Flickr libs..'
+echo '--'
+
+FLICKRJ_ANDROID_LIBS="flickrj-android-1.0.1.20111224194607.jar"
+FLICKRJ_ANDROID_URL="http://flickrj-android.googlecode.com/files/flickrj-android-1.0.1.20111224194607.jar"
+
+if [ -f $FLICKRJ_ANDROID_LIBS ] ;
+	then echo '>> Flickr libs are already present, skipping to the next library';
+else
+	echo '>> Flickr libs not found, downloading..'
+	echo '--'
+	wget $FLICKRJ_ANDROID_URL
+
+	echo -e 'Flickr successfully downloaded. Moving to next library.. \n'
+fi
+
 
 
 #find . -regex ".*\(sh\|jar\)$" | xargs rm -rf
