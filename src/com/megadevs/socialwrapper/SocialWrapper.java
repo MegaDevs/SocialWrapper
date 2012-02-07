@@ -13,11 +13,11 @@ import com.megadevs.socialwrapper.thetwitter.TheTwitter;
 
 public class SocialWrapper {
 	
-	public static String FACEBOOK = "Facebook";
-	public static String TWITTER = "Twitter";
-	public static String FOURSQUARE = "Foursquare";
-	public static String TUMBLR = "Tumblr";
-	public static String FLICKR = "Flickr";
+	public static String THEFACEBOOK = "Facebook";
+	public static String THETWITTER = "Twitter";
+	public static String THEFOURSQUARE = "Foursquare";
+	public static String THETUMBLR = "Tumblr";
+	public static String THEFLICKR = "Flickr";
 	
 	private static SocialWrapper socialWrapper;
 	private static Map<String, SocialNetwork> socialNetworks;
@@ -59,24 +59,24 @@ public class SocialWrapper {
 	 */
 	public SocialNetwork getSocialNetwork(String id) throws SocialNetworkNotFoundException {
 		if (socialNetworks.get(id) == null) {
-			if (id.equals(FACEBOOK)) {
+			if (id.equals(THEFACEBOOK)) {
 				TheFacebook fb = new TheFacebook(id, mActivity);
-				socialNetworks.put(FACEBOOK, fb);
+				socialNetworks.put(THEFACEBOOK, fb);
 				return fb;
 			}
-			if (id.equals(TWITTER)) {
+			if (id.equals(THETWITTER)) {
 				TheTwitter tw = new TheTwitter(id, mActivity);
-				socialNetworks.put(TWITTER, tw);
+				socialNetworks.put(THETWITTER, tw);
 				return tw;
 			}
-			if (id.equals(FOURSQUARE)) {
+			if (id.equals(THEFOURSQUARE)) {
 				TheFoursquare fs = new TheFoursquare(id, mActivity);
-				socialNetworks.put(FOURSQUARE, fs);
+				socialNetworks.put(THEFOURSQUARE, fs);
 				return fs;
 			}
-			if (id.equals(FLICKR)) {
+			if (id.equals(THEFLICKR)) {
 				TheFlickr fl = new TheFlickr(id, mActivity);
-				socialNetworks.put(FLICKR, fl);
+				socialNetworks.put(THEFLICKR, fl);
 				return fl;
 			}
 			

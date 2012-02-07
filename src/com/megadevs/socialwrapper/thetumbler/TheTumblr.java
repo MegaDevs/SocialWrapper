@@ -98,7 +98,7 @@ public class TheTumblr extends SocialNetwork {
 		CONSUMER_SECRET = secret;
 		OAUTH_CALLBACK_URL = callback;
 
-		SocialSessionStore.restore(SocialWrapper.TUMBLR, this, mActivity);
+		SocialSessionStore.restore(SocialWrapper.THETUMBLR, this, mActivity);
 
 		token = connectionData.get("TUMBLR_OAUTH_TOKEN");
 		secret = connectionData.get("TUMBLR_OAUTH_TOKEN_SECRET");
@@ -167,7 +167,7 @@ public class TheTumblr extends SocialNetwork {
 		blogsName = null;
 		numOfBlogs = 0;
 
-		SocialSessionStore.clear(SocialWrapper.TUMBLR, mActivity);
+		SocialSessionStore.clear(SocialWrapper.THETUMBLR, mActivity);
 		authenticated = false;
 	}
 
@@ -222,7 +222,7 @@ public class TheTumblr extends SocialNetwork {
 					blogsName = getBlogs(result);
 				} catch (ParseException e) { e.printStackTrace();
 				} catch (IOException e) { e.printStackTrace(); }
-				SocialSessionStore.save(SocialWrapper.TUMBLR, this, mActivity);
+				SocialSessionStore.save(SocialWrapper.THETUMBLR, this, mActivity);
 				authenticated = true;
 				loginCallback.onLoginCallback(SocialNetwork.ACTION_SUCCESSFUL);
 			}

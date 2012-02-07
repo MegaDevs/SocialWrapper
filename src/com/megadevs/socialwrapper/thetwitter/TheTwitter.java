@@ -85,7 +85,7 @@ public class TheTwitter extends SocialNetwork {
 		System.out.println("setConsumerSecretAndKey");
 		consumerSecret = secret;
 		consumerKey = key;
-		SocialSessionStore.restore(SocialWrapper.TWITTER, this, mActivity);
+		SocialSessionStore.restore(SocialWrapper.THETWITTER, this, mActivity);
 
 		accessToken = getAccessTokenInternal();
 
@@ -129,7 +129,7 @@ public class TheTwitter extends SocialNetwork {
 		System.out.println("setPropers");
 		connectionData.put(accessTokenKey, accessToken.getToken());
 		connectionData.put(accessTokenSecretKey, accessToken.getTokenSecret());
-		SocialSessionStore.save(SocialWrapper.TWITTER, this, mActivity);
+		SocialSessionStore.save(SocialWrapper.THETWITTER, this, mActivity);
 	}
 
 	public void setPropersAccessToken(AccessToken accessTokenTemp) {
@@ -157,7 +157,7 @@ public class TheTwitter extends SocialNetwork {
 		connectionData.remove(accessTokenKey);
 		connectionData.remove(accessTokenSecretKey);
 		accessToken = null;
-		SocialSessionStore.clear(SocialWrapper.TWITTER, mActivity);
+		SocialSessionStore.clear(SocialWrapper.THETWITTER, mActivity);
 	}
 
 	/**

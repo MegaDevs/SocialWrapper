@@ -92,7 +92,7 @@ public class TheFoursquare extends SocialNetwork {
 		
 		mFoursquare = new Foursquare(clientID, callbackURL);
 		
-		SocialSessionStore.restore(SocialWrapper.FOURSQUARE, this, mActivity);
+		SocialSessionStore.restore(SocialWrapper.THEFOURSQUARE, this, mActivity);
 	}
 	
 	/**
@@ -106,7 +106,7 @@ public class TheFoursquare extends SocialNetwork {
 		
 		Log.i(tag, "session validation: "+mFoursquare.isSessionValid());
 
-		SocialSessionStore.save(SocialWrapper.FOURSQUARE, this, mActivity);
+		SocialSessionStore.save(SocialWrapper.THEFOURSQUARE, this, mActivity);
 	}
 	
 	@Override
@@ -134,7 +134,7 @@ public class TheFoursquare extends SocialNetwork {
 	@Override
 	public void deauthenticate() {
 		accessToken = "";
-		SocialSessionStore.clear(SocialWrapper.FOURSQUARE, mActivity);
+		SocialSessionStore.clear(SocialWrapper.THEFOURSQUARE, mActivity);
 	}
 
 	@Override

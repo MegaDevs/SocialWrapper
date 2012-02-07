@@ -16,6 +16,7 @@ import com.gmail.yuyang226.flickr.FlickrException;
 import com.gmail.yuyang226.flickr.oauth.OAuth;
 import com.gmail.yuyang226.flickr.oauth.OAuthToken;
 import com.gmail.yuyang226.flickr.uploader.UploadMetaData;
+
 import com.megadevs.socialwrapper.SocialFriend;
 import com.megadevs.socialwrapper.SocialNetwork;
 import com.megadevs.socialwrapper.SocialSessionStore;
@@ -33,6 +34,15 @@ public class TheFlickr extends SocialNetwork {
 	private TheFlickrLoginCallback loginCallback;
 	private TheFlickrPostPictureCallback pictureCallback;
 	
+	/**
+	 * !-NOTE: THIS METHOD SHOULD NOT BE USED BY THE END USER!-!
+	 * The correct way is SocialWrapper.getSocialNetwork(SocialWrapper.THEFLICKR)
+	 * 
+	 * Default constructor for TheFlickr class. A context is
+	 * required in order to perform the authentication.
+	 * @param id the SocialNetwork ID
+	 * @param a the actual context (passed from the SocialWrapper)
+	 */
 	public TheFlickr(String id, Activity a) {
 		this.id = id;
 		this.mActivity = a;
@@ -40,11 +50,19 @@ public class TheFlickr extends SocialNetwork {
 		iAmTheFlickr = this;
 		
 		// restoring previous session, if there is any
-		SocialSessionStore.restore(SocialWrapper.FLICKR, this, mActivity);
+		SocialSessionStore.restore(SocialWrapper.THEFLICKR, this, mActivity);
 
 		tag = "[SW-THEFLICKR]";
 	}
 
+	
+	/**
+	 * This method must be invoked before starting the authentication process.
+	 * It is used to set the keys (public and secret) obtained from the app page
+	 * on Flickr.com
+	 * @param key the public key
+	 * @param secret the secret key
+	 */
 	public void setAuthParams(String key, String secret) {
 		TheFlickrHelper.setAPIKey(key);
 		TheFlickrHelper.setAPISec(secret);
@@ -67,7 +85,7 @@ public class TheFlickr extends SocialNetwork {
 	public void deauthenticate() {
 		oauthAccess = null;
 		
-		SocialSessionStore.clear(SocialWrapper.FLICKR, mActivity);
+		SocialSessionStore.clear(SocialWrapper.THEFLICKR, mActivity);
 	}
 
 	@Override
@@ -119,6 +137,11 @@ public class TheFlickr extends SocialNetwork {
 		iAmTheFlickr.finalizeAuth(oauthToken, oauthTokenSecret);
 	}
 
+	/**
+	 * 
+	 * @param oauthToken
+	 * @param oauthTokenSecret
+	 */
 	private void finalizeAuth(String oauthToken, String oauthTokenSecret) {
 		// complete auth
 		if (oauthToken != null && oauthTokenSecret != null) {
@@ -128,7 +151,7 @@ public class TheFlickr extends SocialNetwork {
 			
 			loginCallback.onLoginCallback(ACTION_SUCCESSFUL);
 
-			SocialSessionStore.save(SocialWrapper.FLICKR, this, mActivity);
+			SocialSessionStore.save(SocialWrapper.THEFLICKR, this, mActivity);
 		}
 		
 		else loginCallback.onErrorCallback("Could not finalize authentication: token / token secret are null", null);
