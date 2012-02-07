@@ -53,14 +53,15 @@ public class TheTwitter extends SocialNetwork {
 	 * You can set the consumerSecret and consumerKey later (set them equal "")
 	 * 
 	 * @param id
-	 * @param activity
+	 * @param a
 	 * @param secret
 	 * @param key
 	 */
-	public TheTwitter(String id, Activity activity) {
+	public TheTwitter(String id, Activity a) {
 		this.id = id;
+		this.mActivity = a;
 		myTwitter = this;
-		mActivity = activity;
+
 		tag = "[SW-THETWITTER]";
 	}
 
@@ -202,7 +203,7 @@ public class TheTwitter extends SocialNetwork {
 	}
 
 	@Override
-	public void authenticate(SocialBaseCallback r) throws InvalidAuthenticationException {
+	public void authenticate(SocialBaseCallback r) {
 		System.out.println("authenticate");
 		loginCallback = (TheTwitterLoginCallback)r;
 		new Thread(new Runnable() {
@@ -240,9 +241,10 @@ public class TheTwitter extends SocialNetwork {
 						if(twitter.verifyCredentials() == null) {
 							System.out.println(" user nullo ritornato dalla verifica delle credenzionali");
 							System.out.println("1");
-
+							
 						}
 					} catch (TwitterException e2) {
+						// TODO Auto-generated catch block
 						e2.printStackTrace();
 					}
 
@@ -250,12 +252,12 @@ public class TheTwitter extends SocialNetwork {
 						if(checkIstanceTwitter()) { 
 							twitter = twitterFactory.getInstance(accessToken);
 							System.out.println("2");
-
+							
 						}
 						else {
 							removeAccessToken();
 							System.out.println("3");							
-							postCallback.onErrorCallback(SOCIAL_NETWORK_ERROR);
+							postCallback.onPostCallback(SOCIAL_NETWORK_ERROR);
 							throw new InvalidAuthenticationException("Tweet could not be performed, try to reauthenticate", null);
 						}
 					try {
@@ -265,9 +267,9 @@ public class TheTwitter extends SocialNetwork {
 						System.out.println("4.1");
 						removeAccessToken();
 						System.out.println("5");
-
+						
 						//Toast.makeText(mActivity, "Tweet could not be performed, try to reauthenticate", 1000);
-						postCallback.onErrorCallback(SOCIAL_NETWORK_ERROR);
+						postCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, e);
 						try {
 							throw new InvalidAuthenticationException("Tweet could not be performed, try to reauthenticate", null);
 						} catch (InvalidAuthenticationException e1) {
@@ -280,7 +282,7 @@ public class TheTwitter extends SocialNetwork {
 						System.out.println("6");						
 					} catch (TwitterException e) {
 						Toast.makeText(mActivity, "Check your tweet!! You can't post twice the same message!!", 1000);
-						postCallback.onErrorCallback(GENERAL_ERROR);
+						postCallback.onErrorCallback(GENERAL_ERROR, e);
 						System.out.println("7");		
 						callBack = true;
 						e.printStackTrace();
@@ -300,34 +302,34 @@ public class TheTwitter extends SocialNetwork {
 	public void postToFriend(final String friendID, final String msg, SocialBaseCallback s) throws InvalidSocialRequestException {
 		System.out.println("postToFriend");
 		postCallback = (TheTwitterPostCallback) s;
+System.out.println("1");
 		new Thread(new Runnable() {
 
 			@Override
 			public void run() {
 				Boolean callBack = false;
-				try {
+				System.out.println("2");
 					if(twitter == null)
 						if(checkIstanceTwitter())  {
 							twitter = twitterFactory.getInstance(accessToken);
+							System.out.println("3");
 						}
 						else { 
+							System.out.println("remove1");
 							removeAccessToken();
-							postCallback.onPostCallback(SOCIAL_NETWORK_ERROR);
+							postCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, null);
 							//Toast.makeText(mActivity, "Check your tweet!! You can't post twice the same message!!", 1000);
-							throw new InvalidSocialRequestException("Tweet could not be performed, try to reauthenticate", null);
 						}
 
 					try {
 						System.out.println(twitter.verifyCredentials().getId());
+						System.out.println("4");
 					} catch (TwitterException e) {
+						System.out.println("remove2");
 						removeAccessToken();
+						System.out.println("5");
 						//Toast.makeText(mActivity, "Tweet could not be performed, try to reauthenticate", 1000);
-						postCallback.onErrorCallback(SOCIAL_NETWORK_ERROR);
-						try {
-							throw new InvalidSocialRequestException("Tweet could not be performed, try to reauthenticate", e);
-						} catch (InvalidSocialRequestException e1) {
-							e1.printStackTrace();
-						}
+						postCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, e);
 					}
 
 					/*
@@ -336,7 +338,7 @@ public class TheTwitter extends SocialNetwork {
 					 * Ensure that you have set valid conumer key/secret, access token/secret, and the system clock in in sync.
 
 					 */
-
+					
 					try {
 						System.out.println("7");
 						System.out.println("@" + friendID + " " + msg);
@@ -347,20 +349,17 @@ public class TheTwitter extends SocialNetwork {
 						removeAccessToken();
 						//Toast.makeText(mActivity, "Tweet could not be performed, try to reauthenticate", 1000);
 						callBack = true;
-						postCallback.onErrorCallback(GENERAL_ERROR);
+						postCallback.onErrorCallback(GENERAL_ERROR, e);
 					}
 					// check the status
 					if(callBack == false)
 						postCallback.onPostCallback(ACTION_SUCCESSFUL);	
-				} catch (InvalidSocialRequestException e) {
-					e.printStackTrace();
-				}
 			}
 		}).start();
 	}
 
 	@Override
-	public void getFriendsList(SocialBaseCallback s) throws InvalidSocialRequestException {
+	public void getFriendsList(SocialBaseCallback s) {
 		System.out.println("getFriendsList");
 
 		friendslistCallback = (TheTwitterFriendListCallback) s;
@@ -380,7 +379,7 @@ public class TheTwitter extends SocialNetwork {
 						else {
 							System.out.println("removeAccessToken()");
 							removeAccessToken();
-							friendslistCallback.onErrorCallback(SOCIAL_NETWORK_ERROR);
+							friendslistCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, null);
 							throw new InvalidSocialRequestException("Tweet could not be performed, try to reauthenticate", null);
 						}
 					}
@@ -401,7 +400,7 @@ public class TheTwitter extends SocialNetwork {
 					} catch (TwitterException e) {
 						removeAccessToken();
 						Toast.makeText(mActivity, "Tweet could not be performed, try to reauthenticate", 1000);
-						friendslistCallback.onErrorCallback(SOCIAL_NETWORK_ERROR);
+						friendslistCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, null);
 						try {
 							throw new InvalidSocialRequestException("Could not retrive the friends list, try to reauthenticate", e);
 						} catch (InvalidSocialRequestException e1) {
@@ -423,21 +422,21 @@ public class TheTwitter extends SocialNetwork {
 		public abstract void onLoginCallback(String result);
 		public void onPostCallback(String result) {};
 		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
-		public abstract void onErrorCallback(String error); 
+		public abstract void onErrorCallback(String error, Exception e); 
 	}
 
 	public static abstract class TheTwitterPostCallback implements SocialBaseCallback {
 		public void onLoginCallback(String result) {};
 		public abstract void onPostCallback(String result);
 		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
-		public abstract void onErrorCallback(String error);
+		public abstract void onErrorCallback(String error, Exception e);
 	}
 
 	public static abstract class TheTwitterFriendListCallback implements SocialBaseCallback {
 		public void onLoginCallback(String result) {};
 		public void onPostCallback(String result) {};
 		public abstract void onFriendsListCallback(String result, ArrayList<SocialFriend> list);
-		public abstract void onErrorCallback(String error);
+		public abstract void onErrorCallback(String error, Exception e);
 	}
 
 	@Override
@@ -474,17 +473,9 @@ public class TheTwitter extends SocialNetwork {
 	}
 
 
-
-	@Override
-	public String getId() {
-		return this.id;
-	}
-}
-
-
-/*
- * ===== OLD BUT USEFULL ====
- * 
+	/*
+	 * ===== OLD BUT USEFULL ====
+	 * 
 if(twitter == null) {
 	Log.i(tag, "twitter non autenticato. twitter == null");
 	if(accessToken == null) {
@@ -502,4 +493,10 @@ if(twitter == null) {
 	Log.i(tag, "twitter già autenticato");
 	return twitter;	
 }
- */
+	 */
+
+	@Override
+	public String getId() {
+		return this.id;
+	}
+}

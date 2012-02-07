@@ -23,8 +23,6 @@ public class TheTwitterWebView extends Activity {
 	Twitter twitter;
 	RequestToken requestToken;
 
-	private static Integer count = 0;
-
 	private static String logTag = "Corso12 - Social - Twitter";
 
 	@Override

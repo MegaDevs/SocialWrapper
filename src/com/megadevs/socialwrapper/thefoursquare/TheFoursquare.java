@@ -21,7 +21,6 @@ import com.megadevs.socialwrapper.SocialFriend;
 import com.megadevs.socialwrapper.SocialNetwork;
 import com.megadevs.socialwrapper.SocialSessionStore;
 import com.megadevs.socialwrapper.SocialWrapper;
-import com.megadevs.socialwrapper.exceptions.InvalidAuthenticationException;
 import com.megadevs.socialwrapper.exceptions.InvalidSocialRequestException;
 import com.megadevs.socialwrapper.utils.HTTPPostParameters;
 import com.megadevs.socialwrapper.utils.HTTPResult;
@@ -38,7 +37,6 @@ public class TheFoursquare extends SocialNetwork {
 
 	private Foursquare mFoursquare;
 	private static TheFoursquare iAmTheFoursquare;
-	private Activity mActivity;
 
 	private String clientID;
 	private String clientSecret;
@@ -64,13 +62,14 @@ public class TheFoursquare extends SocialNetwork {
 	 */
 	public TheFoursquare(String id, Activity a) {
 		this.id = id;
-		mActivity = a;
+		this.mActivity = a;
 		iAmTheFoursquare = this;
 		
 		tag = "SocialWrapper-Foursquare";
 	}
 
 	/**
+	 * !-NOTE: THIS METHOD SHOULD NOT BE USED BY THE END USER!-! 
 	 * This method is used within the callback procedure to
 	 * set the authenticated Foursquare object.
 	 * @return the existing instance of TheFoursquare
@@ -86,7 +85,7 @@ public class TheFoursquare extends SocialNetwork {
 	 * only after this action is completed.
 	 * @param id the application id provided by Foursquare
 	 */
-	public void setFSParams(String id, String secret, String url) {
+	public void setAuthParams(String id, String secret, String url) {
 		clientID = id;
 		clientSecret = secret;
 		callbackURL = url;
@@ -97,7 +96,7 @@ public class TheFoursquare extends SocialNetwork {
 	}
 	
 	/**
-	 * 
+	 * !-NOTE: THIS METHOD SHOULD NOT BE USED BY THE END USER!-!
 	 * @param obj
 	 */
 	public void setFoursquare(Foursquare obj) {
@@ -106,20 +105,20 @@ public class TheFoursquare extends SocialNetwork {
 		accessToken = mFoursquare.getAccessToken();
 		
 		Log.i(tag, "session validation: "+mFoursquare.isSessionValid());
+
 		SocialSessionStore.save(SocialWrapper.FOURSQUARE, this, mActivity);
-		
-		if (loginCallback != null) {
-			loginCallback.onLoginCallback(actionResult);
-			loginCallback = null;
-		}
 	}
 	
 	@Override
-	public void authenticate(SocialBaseCallback r) throws InvalidAuthenticationException {
+	public void authenticate(SocialBaseCallback r) {
 		loginCallback = (TheFoursquareLoginCallback) r;
 		if (mFoursquare.isSessionValid()) {
 			Log.i(tag, "session valid, use it wisely :P");
-			loginCallback.onLoginCallback(SocialNetwork.ACTION_SUCCESSFUL);
+
+			if (loginCallback != null) {
+				loginCallback.onLoginCallback(actionResult);
+				loginCallback = null;
+			}
 		}
 		else {
 			Intent i = new Intent(mActivity, TheFoursquareActivity.class);
@@ -164,17 +163,20 @@ public class TheFoursquare extends SocialNetwork {
 		}
 	}
 	
-	public void forwardResult() {
+	/**
+	 * !-NOTE: THIS METHOD SHOULD NOT BE USED BY THE END USER!-!
+	 */
+	public void forwardErrorResult(Exception e) {
 		if (loginCallback != null)
-			loginCallback.onErrorCallback(actionResult);
+			loginCallback.onErrorCallback(actionResult, e);
 		else if (friendslistCallback != null)
-			friendslistCallback.onErrorCallback(actionResult);
+			friendslistCallback.onErrorCallback(actionResult, e);
 		else if (searchCallback != null)
-			searchCallback.onErrorCallback(actionResult);
+			searchCallback.onErrorCallback(actionResult, e);
 		else if (checkinCallback != null)
-			checkinCallback.onErrorCallback(actionResult);
+			checkinCallback.onErrorCallback(actionResult, e);
 		else if (postPictureCallback != null)
-			postPictureCallback.onErrorCallback(actionResult);
+			postPictureCallback.onErrorCallback(actionResult, e);
 	}
 
 	
@@ -257,7 +259,7 @@ public class TheFoursquare extends SocialNetwork {
 	 * @param id a valid checkin ID
 	 * @throws InvalidSocialRequestException 
 	 */
-	public void postPicture(File image, String id, SocialBaseCallback s) throws InvalidSocialRequestException {
+	public void postPicture(File image, String id, SocialBaseCallback s) {
 		postPictureCallback = (TheFoursquarePostPictureCallback) s;
 		String endpoint = "https://api.foursquare.com/v2/photos/add?";
 		
@@ -283,17 +285,17 @@ public class TheFoursquare extends SocialNetwork {
 					postPictureCallback.onPostPictureCallback(actionResult);
 				} else {
 					actionResult = SOCIAL_NETWORK_ERROR;
-					forwardResult();
+					forwardErrorResult(null);
 				}
 
 				postPictureCallback = null;
 			}
 		} catch (IOException e) {
+			postPictureCallback.onErrorCallback(GENERAL_ERROR, e);
 			postPictureCallback = null;
-			throw new InvalidSocialRequestException("Could not upload the photo", e);
 		} catch (JSONException e) {
+			postPictureCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, e);
 			postPictureCallback = null;
-			throw new InvalidSocialRequestException("Could not upload the photo", e);
 		}
 	}
 	
@@ -307,7 +309,7 @@ public class TheFoursquare extends SocialNetwork {
 	 * @return
 	 * @throws InvalidSocialRequestException 
 	 */
-	public void checkIn(String id, String message, SocialBaseCallback s) throws InvalidSocialRequestException {
+	public void checkIn(String id, String message, SocialBaseCallback s) {
 		checkinCallback = (TheFoursquareCheckinCallback) s;
 		Log.i(tag, "checkin");
 		String endpoint = "https://api.foursquare.com/v2/checkins/add?";
@@ -342,26 +344,26 @@ public class TheFoursquare extends SocialNetwork {
 
 			} else {
 				actionResult = SOCIAL_NETWORK_ERROR;
-				forwardResult();
+				forwardErrorResult(null);
 			}
 
 			checkinCallback = null;
 		
 		} catch (MalformedURLException e) {
+			checkinCallback.onErrorCallback(GENERAL_ERROR, e);
 			checkinCallback = null;
-			throw new InvalidSocialRequestException("Could not checkin", e);
 		} catch (IOException e) {
+			checkinCallback.onErrorCallback(GENERAL_ERROR, e);
 			checkinCallback = null;
-			throw new InvalidSocialRequestException("Could not checkin", e);
 		} catch (JSONException e) {
+			checkinCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, e);
 			checkinCallback = null;
-			throw new InvalidSocialRequestException("Could not checkin", e);
 		}
 	}
 	
 	
 	@Override
-	public void getFriendsList(SocialBaseCallback s) throws InvalidSocialRequestException {
+	public void getFriendsList(SocialBaseCallback s) {
 		mFoursquareFriends = new ArrayList<SocialFriend>();
 
 		try {
@@ -386,7 +388,7 @@ public class TheFoursquare extends SocialNetwork {
 			}
 
 		} catch (JSONException e) {
-			throw new InvalidSocialRequestException("Could not retrieve the nearby venues", e);
+			checkinCallback.onErrorCallback(GENERAL_ERROR, e);
 		}
 	}
 
@@ -421,7 +423,7 @@ public class TheFoursquare extends SocialNetwork {
 		public void onCheckinCallback(String result, String checkinId) {};
 		public void onPostPictureCallback(String result) {};
 		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
-		public abstract void onErrorCallback(String error); 
+		public abstract void onErrorCallback(String error, Exception e); 
 	}
 
 	public static abstract class TheFoursquareSearchCallback implements SocialBaseCallback {
@@ -429,7 +431,7 @@ public class TheFoursquare extends SocialNetwork {
 		public abstract void onSearchVenuesCallback(String result, ArrayList<TheFoursquareVenue> list);
 		public void onCheckinCallback(String result, String checkinId) {};		public void onPostPictureCallback(String result) {};
 		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
-		public abstract void onErrorCallback(String error);
+		public abstract void onErrorCallback(String error, Exception e);
 	}
 
 	public static abstract class TheFoursquareFriendListCallback implements SocialBaseCallback {
@@ -437,7 +439,7 @@ public class TheFoursquare extends SocialNetwork {
 		public void onSearchVenuesCallback(String result, ArrayList<TheFoursquareVenue> list) {};
 		public void onCheckinCallback(String result, String checkinId) {};		public void onPostPictureCallback(String result) {};
 		public abstract void onFriendsListCallback(String result, ArrayList<SocialFriend> list);
-		public abstract void onErrorCallback(String error);
+		public abstract void onErrorCallback(String error, Exception e);
 	}
 
 	public static abstract class TheFoursquarePostPictureCallback implements SocialBaseCallback {
@@ -446,7 +448,7 @@ public class TheFoursquare extends SocialNetwork {
 		public void onCheckinCallback(String result, String checkinId) {};
 		public abstract void onPostPictureCallback(String result);
 		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
-		public abstract void onErrorCallback(String error); 
+		public abstract void onErrorCallback(String error, Exception e); 
 	}
 
 	public static abstract class TheFoursquareCheckinCallback implements SocialBaseCallback {
@@ -455,7 +457,7 @@ public class TheFoursquare extends SocialNetwork {
 		public abstract void onCheckinCallback(String result, String checkinId);
 		public void onPostPictureCallback(String result) {};
 		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
-		public abstract void onErrorCallback(String error); 
+		public abstract void onErrorCallback(String error, Exception e); 
 	}
 
 }

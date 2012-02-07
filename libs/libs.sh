@@ -91,5 +91,10 @@ else
 	echo -e 'Tumblr successfully downloaded. Moving to next library.. \n'
 fi
 
+# add ASAP
+# http://code.google.com/p/flickrj-android/downloads/detail?name=flickrj-android-1.0.1.20111224194607.jar&can=2&q=
+# http://www.slf4j.org/android/slf4j-android-1.6.1-RC1.jar
+
+
 #find . -regex ".*\(sh\|jar\)$" | xargs rm -rf
 #find . ! -iname $SCRIPT_NAME -o -iname $TWITTER4J_CORE_LIB -exec -rm -rf;

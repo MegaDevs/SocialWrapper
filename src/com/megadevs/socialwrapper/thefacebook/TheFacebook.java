@@ -27,7 +27,6 @@ import com.facebook.android.Util;
 import com.megadevs.socialwrapper.SocialFriend;
 import com.megadevs.socialwrapper.SocialNetwork;
 import com.megadevs.socialwrapper.SocialSessionStore;
-import com.megadevs.socialwrapper.exceptions.InvalidAuthenticationException;
 import com.megadevs.socialwrapper.exceptions.InvalidSocialRequestException;
 
 /**
@@ -44,8 +43,6 @@ public class TheFacebook extends SocialNetwork {
 	private AsyncFacebookRunner mAsyncRunner;
 
 	private ArrayList<SocialFriend> mFacebookFriends;
-
-	private Activity mActivity;
 
 	private String appID;
 
@@ -75,8 +72,8 @@ public class TheFacebook extends SocialNetwork {
 	 */
 	public TheFacebook(String id, Activity a) {
 		this.id = id;
+		this.mActivity = a;
 		iAmTheFacebook = this;
-		mActivity = a;
 
 		tag = "[SW-THEFACEBOOK]";
 	}
@@ -135,7 +132,7 @@ public class TheFacebook extends SocialNetwork {
 	}
 
 	@Override
-	public void authenticate(SocialBaseCallback r) throws InvalidAuthenticationException {
+	public void authenticate(SocialBaseCallback r) {
 		// check if a valid session is already available, otherwise perform a full login
 		loginCallback = (TheFacebookLoginCallback)r;
 		if (mFacebook.isSessionValid()) {
@@ -188,7 +185,7 @@ public class TheFacebook extends SocialNetwork {
 	}
 
 	@Override
-	public void getFriendsList(SocialBaseCallback s) throws InvalidSocialRequestException {
+	public void getFriendsList(SocialBaseCallback s) {
 		friendslistCallback = (TheFacebookFriendListCallback) s;
 		mFacebookFriends = new ArrayList<SocialFriend>();
 		mAsyncRunner.request("me/friends", new Bundle(), new FriendListRequestListener());
@@ -263,7 +260,7 @@ public class TheFacebook extends SocialNetwork {
 		public void onPostCallback(String result) {};
 		public void onPostPictureCallback(String result) {};
 		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
-		public abstract void onErrorCallback(String error); 
+		public abstract void onErrorCallback(String error, Exception e); 
 	}
 
 	public static abstract class TheFacebookPostCallback implements SocialBaseCallback {
@@ -271,7 +268,7 @@ public class TheFacebook extends SocialNetwork {
 		public abstract void onPostCallback(String result);
 		public void onPostPictureCallback(String result) {};
 		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
-		public abstract void onErrorCallback(String error);
+		public abstract void onErrorCallback(String error, Exception e);
 	}
 
 	public static abstract class TheFacebookFriendListCallback implements SocialBaseCallback {
@@ -279,7 +276,7 @@ public class TheFacebook extends SocialNetwork {
 		public void onPostCallback(String result) {};
 		public void onPostPictureCallback(String result) {};
 		public abstract void onFriendsListCallback(String result, ArrayList<SocialFriend> list);
-		public abstract void onErrorCallback(String error);
+		public abstract void onErrorCallback(String error, Exception e);
 	}
 	
 	public static abstract class TheFacebookPictureCallback implements SocialBaseCallback {
@@ -287,8 +284,7 @@ public class TheFacebook extends SocialNetwork {
 		public void onPostCallback(String result) {};
 		public abstract void onPostPictureCallback(String result);
 		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
-		public abstract void onErrorCallback(String error);
-
+		public abstract void onErrorCallback(String error, Exception e);
 	}
 	
 	// needs to have package visibility, otherwise TheFacebookActivity cannot perform the login process
@@ -384,77 +380,71 @@ public class TheFacebook extends SocialNetwork {
 
 	private abstract class TheFacebookBaseDialogListener implements DialogListener {
 
-		private void forwardResult() {
+		private void forwardErrorResult(Exception e) {
 			if (loginCallback != null)
-				loginCallback.onErrorCallback(actionResult);
+				loginCallback.onErrorCallback(actionResult, e);
 			else if (postCallback != null)
-				postCallback.onErrorCallback(actionResult);
+				postCallback.onErrorCallback(actionResult, e);
 			else if (friendslistCallback != null)
-				friendslistCallback.onErrorCallback(actionResult);
+				friendslistCallback.onErrorCallback(actionResult, e);
 			else if (pictureCallback != null)
-				pictureCallback.onErrorCallback(actionResult);
+				pictureCallback.onErrorCallback(actionResult, e);
 		}
 
 		public void onFacebookError(FacebookError e) {
 			TheFacebook.this.setActionResult(SocialNetwork.SOCIAL_NETWORK_ERROR,null);
 			Log.d(tag, SocialNetwork.SOCIAL_NETWORK_ERROR, e);
-			e.printStackTrace();
-			forwardResult();
+			forwardErrorResult(null);
 		}
 
 		public void onError(DialogError e) {
 			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR,null);
 			Log.d(tag, SocialNetwork.GENERAL_ERROR, e);   
-			e.printStackTrace();
-			forwardResult();
+			forwardErrorResult(null);
 		}
 
 		public void onCancel() {
 			TheFacebook.this.setActionResult(SocialNetwork.ACTION_CANCELED,null);
 			Log.d(tag, SocialNetwork.ACTION_CANCELED);
-			forwardResult();
+			forwardErrorResult(null);
 		}
 	}
 
 	private abstract class TheFacebookBaseRequestListener implements RequestListener {
 
-		private void forwardResult() {
+		private void forwardErrorResult(Exception e) {
 			if (loginCallback != null)
-				loginCallback.onErrorCallback(actionResult);
+				loginCallback.onErrorCallback(actionResult, e);
 			else if (postCallback != null)
-				postCallback.onErrorCallback(actionResult);
+				postCallback.onErrorCallback(actionResult, e);
 			else if (friendslistCallback != null)
-				friendslistCallback.onErrorCallback(actionResult);
+				friendslistCallback.onErrorCallback(actionResult, e);
 			else if (pictureCallback != null)
-				pictureCallback.onErrorCallback(actionResult);
+				pictureCallback.onErrorCallback(actionResult, e);
 		}
 
 		public void onFacebookError(FacebookError e, final Object state) {
 			TheFacebook.this.setActionResult(SocialNetwork.SOCIAL_NETWORK_ERROR,null);
 			Log.d(tag, SocialNetwork.SOCIAL_NETWORK_ERROR, e);
-			e.printStackTrace();
-			forwardResult();
+			forwardErrorResult(null);
 		}
 
 		public void onFileNotFoundException(FileNotFoundException e, final Object state) {
 			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR,e);
 			Log.d(tag, SocialNetwork.GENERAL_ERROR, e);
-			e.printStackTrace();
-			forwardResult();
+			forwardErrorResult(e);
 		}
 
 		public void onIOException(IOException e, final Object state) {
 			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR,e);
 			Log.d(tag, SocialNetwork.GENERAL_ERROR, e);
-			e.printStackTrace();
-			forwardResult();
+			forwardErrorResult(e);
 		}
 
 		public void onMalformedURLException(MalformedURLException e, final Object state) {
 			TheFacebook.this.setActionResult(SocialNetwork.GENERAL_ERROR,e);
 			Log.d(tag, SocialNetwork.GENERAL_ERROR, e);
-			e.printStackTrace();
-			forwardResult();
+			forwardErrorResult(e);
 		}
 	}
 	

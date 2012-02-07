@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Vector;
 
+import android.app.Activity;
+
 import com.megadevs.socialwrapper.exceptions.InvalidAuthenticationException;
 import com.megadevs.socialwrapper.exceptions.InvalidSocialRequestException;
 import com.megadevs.socialwrapper.exceptions.NetworkErrorException;
@@ -18,6 +20,8 @@ import com.megadevs.socialwrapper.exceptions.NetworkErrorException;
 public abstract class SocialNetwork {
 	
 	protected String id;
+	protected Activity mActivity;
+	
 	protected Map<String, String> connectionData;
 	protected String actionResult;
 	// it may be null
@@ -35,7 +39,7 @@ public abstract class SocialNetwork {
 	 * @throws InvalidAuthenticationException 
 	 * @throws NetworkErrorException 
 	 */
-	public abstract void authenticate(SocialBaseCallback s) throws InvalidAuthenticationException, NetworkErrorException;
+	public abstract void authenticate(SocialBaseCallback s);
 	
 	/**
 	 * General abstract method which performs deauthentication. Since it is not possible
@@ -52,7 +56,7 @@ public abstract class SocialNetwork {
 	 * @throws NetworkErrorException 
 	 * @throws InvalidAuthenticationException 
 	 */
-	public abstract void getFriendsList(SocialBaseCallback s) throws InvalidSocialRequestException, InvalidAuthenticationException;
+	public abstract void getFriendsList(SocialBaseCallback s);
 
 	/**
 	 * This method is used to save the connection parameters of a SocialNetwork instance in the prefs.
@@ -81,6 +85,6 @@ public abstract class SocialNetwork {
 	public static interface SocialBaseCallback {
 		public void onLoginCallback(String result);
 		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list);
-		public void onErrorCallback(String error);
+		public void onErrorCallback(String error, Exception e);
 	}
 }

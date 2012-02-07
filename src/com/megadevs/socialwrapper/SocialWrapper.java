@@ -7,6 +7,7 @@ import android.app.Activity;
 
 import com.megadevs.socialwrapper.exceptions.SocialNetworkNotFoundException;
 import com.megadevs.socialwrapper.thefacebook.TheFacebook;
+import com.megadevs.socialwrapper.theflickr.TheFlickr;
 import com.megadevs.socialwrapper.thefoursquare.TheFoursquare;
 import com.megadevs.socialwrapper.thetwitter.TheTwitter;
 
@@ -72,6 +73,11 @@ public class SocialWrapper {
 				TheFoursquare fs = new TheFoursquare(id, mActivity);
 				socialNetworks.put(FOURSQUARE, fs);
 				return fs;
+			}
+			if (id.equals(FLICKR)) {
+				TheFlickr fl = new TheFlickr(id, mActivity);
+				socialNetworks.put(FLICKR, fl);
+				return fl;
 			}
 			
 			// nothing was found, so an exception must be risen

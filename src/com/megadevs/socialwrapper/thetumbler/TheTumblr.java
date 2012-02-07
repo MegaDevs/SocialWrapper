@@ -20,7 +20,6 @@ import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.params.ConnConnectionParamBean;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
@@ -28,11 +27,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import twitter4j.TwitterFactory;
-import twitter4j.conf.Configuration;
-import twitter4j.conf.ConfigurationBuilder;
-
-import android.R.bool;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -41,10 +35,6 @@ import com.megadevs.socialwrapper.SocialFriend;
 import com.megadevs.socialwrapper.SocialNetwork;
 import com.megadevs.socialwrapper.SocialSessionStore;
 import com.megadevs.socialwrapper.SocialWrapper;
-import com.megadevs.socialwrapper.SocialNetwork.SocialBaseCallback;
-import com.megadevs.socialwrapper.exceptions.InvalidAuthenticationException;
-import com.megadevs.socialwrapper.exceptions.InvalidSocialRequestException;
-import com.megadevs.socialwrapper.exceptions.NetworkErrorException;
 
 public class TheTumblr extends SocialNetwork {
 
@@ -70,8 +60,6 @@ public class TheTumblr extends SocialNetwork {
 	// static callback refs
 	private TheTumblrLoginCallback loginCallback;
 	private TheTumblrPostCallback postCallback;
-	private TheTumblrFriendListCallback friendslistCallback;
-
 
 	private static String authURL;
 
@@ -478,8 +466,7 @@ public class TheTumblr extends SocialNetwork {
 	}
 
 	@Override
-	public void authenticate(SocialBaseCallback s)
-			throws InvalidAuthenticationException, NetworkErrorException {
+	public void authenticate(SocialBaseCallback s) {
 		loginCallback = (TheTumblrLoginCallback)s;
 		new Thread(new Runnable() {
 			@Override
@@ -490,9 +477,7 @@ public class TheTumblr extends SocialNetwork {
 	}
 
 	@Override
-	public void getFriendsList(SocialBaseCallback s)
-			throws InvalidSocialRequestException,
-			InvalidAuthenticationException {
+	public void getFriendsList(SocialBaseCallback s) {
 		// TODO Auto-generated method stub
 
 	}

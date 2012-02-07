@@ -54,7 +54,7 @@ public class TheFoursquareActivity extends Activity {
 		public void onCancel() {
 			Log.d(iAmTheFoursquare.tag, SocialNetwork.ACTION_CANCELED);
 			iAmTheFoursquare.setActionResult(SocialNetwork.ACTION_CANCELED);
-			iAmTheFoursquare.forwardResult();
+			iAmTheFoursquare.forwardErrorResult(null);
 			
 			finish();
 		}
@@ -72,7 +72,7 @@ public class TheFoursquareActivity extends Activity {
 		public void onError(DialogError e) {
 			Log.d(iAmTheFoursquare.tag, SocialNetwork.GENERAL_ERROR, e);
 			iAmTheFoursquare.setActionResult(SocialNetwork.GENERAL_ERROR);
-			iAmTheFoursquare.forwardResult();
+			iAmTheFoursquare.forwardErrorResult(null);
 			
 			finish();
 		}
@@ -81,7 +81,7 @@ public class TheFoursquareActivity extends Activity {
 		public void onFoursquareError(FoursquareError e) {
 			Log.d(iAmTheFoursquare.tag, SocialNetwork.SOCIAL_NETWORK_ERROR, e);
 			iAmTheFoursquare.setActionResult(SocialNetwork.SOCIAL_NETWORK_ERROR);
-			iAmTheFoursquare.forwardResult();
+			iAmTheFoursquare.forwardErrorResult(null);
 			
 			finish();
 		}
