@@ -25,8 +25,7 @@ public class SocialSessionStore {
 	 * @return a boolean value representing the success or failure
 	 */
 	public static boolean save(String socialKey, SocialNetwork session, Context context) {
-		Editor editor =
-			context.getSharedPreferences(socialKey, Context.MODE_PRIVATE).edit();
+		Editor editor =	context.getSharedPreferences(socialKey, Context.MODE_PRIVATE).edit();
 		Vector<String[]> data = session.getConnectionData();
 
 		for(String[] s : data) {
@@ -45,8 +44,7 @@ public class SocialSessionStore {
 	@SuppressWarnings("unchecked")
 	public static void restore(String socialKey, SocialNetwork session, Context context) {
 
-		SharedPreferences savedSession =
-			context.getSharedPreferences(socialKey, Context.MODE_PRIVATE);
+		SharedPreferences savedSession = context.getSharedPreferences(socialKey, Context.MODE_PRIVATE);
 		
 		session.setConnectionData((Map<String, String>) savedSession.getAll());
 	}
@@ -57,8 +55,7 @@ public class SocialSessionStore {
 	 * @param context the application context (needed in order to get access to the prefs)
 	 */
 	public static void clear(String socialKey, Context context) {
-		Editor editor = 
-			context.getSharedPreferences(socialKey, Context.MODE_PRIVATE).edit();
+		Editor editor = context.getSharedPreferences(socialKey, Context.MODE_PRIVATE).edit();
 		editor.clear();
 		editor.commit();
 	}

@@ -1,4 +1,4 @@
-package com.megadevs.socialwrapper.thetumbler;
+package com.megadevs.socialwrapper.thetumblr;
 
 import com.megadevs.socialwrapper.R;
 

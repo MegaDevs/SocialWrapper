@@ -98,6 +98,8 @@ public class TheFacebook extends SocialNetwork {
 		appID = id;
 		mFacebook = new Facebook(appID);
 
+		System.out.println(mActivity == null);
+		
 		// try to restore a previously saved session
 		SocialSessionStore.restore(this.id, this, mActivity);
 

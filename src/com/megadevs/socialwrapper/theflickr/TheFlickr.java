@@ -9,6 +9,7 @@ import org.xml.sax.SAXException;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 
 import com.gmail.yuyang226.flickr.Flickr;
@@ -30,6 +31,8 @@ public class TheFlickr extends SocialNetwork {
 	private OAuth oauthAccess;
 	
 	private static TheFlickr iAmTheFlickr;
+	
+	protected static Uri OAUTH_CALLBACK_URI;
 	
 	private TheFlickrLoginCallback loginCallback;
 	private TheFlickrPostPictureCallback pictureCallback;
@@ -63,9 +66,10 @@ public class TheFlickr extends SocialNetwork {
 	 * @param key the public key
 	 * @param secret the secret key
 	 */
-	public void setAuthParams(String key, String secret) {
+	public void setAuthParams(String key, String secret, String callback) {
 		TheFlickrHelper.setAPIKey(key);
 		TheFlickrHelper.setAPISec(secret);
+		OAUTH_CALLBACK_URI = Uri.parse(callback);
 	}
 	
 	@Override

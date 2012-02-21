@@ -105,6 +105,12 @@ public class TheFoursquare extends SocialNetwork {
 		accessToken = mFoursquare.getAccessToken();
 		
 		Log.i(tag, "session validation: "+mFoursquare.isSessionValid());
+		
+		if (mFoursquare.isSessionValid() && actionResult == SocialNetwork.ACTION_SUCCESSFUL)
+			if (loginCallback != null) {
+				loginCallback.onLoginCallback(actionResult);
+				loginCallback = null;
+			}
 
 		SocialSessionStore.save(SocialWrapper.THEFOURSQUARE, this, mActivity);
 	}

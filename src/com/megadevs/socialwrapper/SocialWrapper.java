@@ -9,6 +9,7 @@ import com.megadevs.socialwrapper.exceptions.SocialNetworkNotFoundException;
 import com.megadevs.socialwrapper.thefacebook.TheFacebook;
 import com.megadevs.socialwrapper.theflickr.TheFlickr;
 import com.megadevs.socialwrapper.thefoursquare.TheFoursquare;
+import com.megadevs.socialwrapper.thetumblr.TheTumblr;
 import com.megadevs.socialwrapper.thetwitter.TheTwitter;
 
 public class SocialWrapper {
@@ -22,7 +23,7 @@ public class SocialWrapper {
 	private static SocialWrapper socialWrapper;
 	private static Map<String, SocialNetwork> socialNetworks;
 
-	private static Activity mActivity;
+	private static Activity mActivity = null;
 	
 	public static SocialWrapper getInstance() {
 		if(socialWrapper == null)
@@ -39,6 +40,10 @@ public class SocialWrapper {
 	 */
 	public void setActivity(Activity a) {
 		mActivity = a;
+	
+		// updates the current activity for the existing socials
+		for (String s : socialNetworks.keySet())
+			socialNetworks.get(s).setActivity(mActivity);
 	}
 	
 	/**
@@ -78,6 +83,11 @@ public class SocialWrapper {
 				TheFlickr fl = new TheFlickr(id, mActivity);
 				socialNetworks.put(THEFLICKR, fl);
 				return fl;
+			}
+			if (id.equals(THETUMBLR)) {
+				TheTumblr tu = new TheTumblr(id, mActivity);
+				socialNetworks.put(THETUMBLR, tu);
+				return tu;
 			}
 			
 			// nothing was found, so an exception must be risen

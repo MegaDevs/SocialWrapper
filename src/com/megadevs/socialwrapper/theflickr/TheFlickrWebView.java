@@ -20,7 +20,6 @@ import com.megadevs.socialwrapper.R;
 
 public class TheFlickrWebView extends Activity {
 
-	private final Uri OAUTH_CALLBACK_URI = Uri.parse("flickr://oauth"); 
 	private OAuth aToken;
 	
 	private String oauthTokenSecret;
@@ -33,7 +32,7 @@ public class TheFlickrWebView extends Activity {
 		Flickr f = TheFlickrHelper.getInstance().getFlickr();
 		OAuthToken oauthToken;
 		try {
-			oauthToken = f.getOAuthInterface().getRequestToken(OAUTH_CALLBACK_URI.toString());
+			oauthToken = f.getOAuthInterface().getRequestToken(TheFlickr.OAUTH_CALLBACK_URI.toString());
 			oauthTokenSecret = oauthToken.getOauthTokenSecret();
 			URL oauthUrl = f.getOAuthInterface().buildAuthenticationUrl(Permission.WRITE, oauthToken);
 			

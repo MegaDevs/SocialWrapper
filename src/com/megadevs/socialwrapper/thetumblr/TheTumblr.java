@@ -1,4 +1,4 @@
-package com.megadevs.socialwrapper.thetumbler;
+package com.megadevs.socialwrapper.thetumblr;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -107,11 +107,11 @@ public class TheTumblr extends SocialNetwork {
 		numOfBlogs = Integer.getInteger(connectionData.get("TUMBLR_NUM_BLOGS"));
 		blogsName = new ArrayList<String>();
 
-		for(int i = 0; i < numOfBlogs; i++) {
-			blogsName.add(connectionData.get("TUMBLR_BLOG" + i));
-		}
+		if (numOfBlogs != null)
+			for(int i = 0; i < numOfBlogs; i++)
+				blogsName.add(connectionData.get("TUMBLR_BLOG" + i));
 
-		if(token.equals("") && secret.equals("")) {
+		if(token == null && secret == null) {
 			System.out.println("Utente da autenticare");
 			authenticated = false;
 		} else {
@@ -261,31 +261,39 @@ public class TheTumblr extends SocialNetwork {
 
 			try {
 				hpost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-			} catch (UnsupportedEncodingException e) { System.out.println("ERROR1");e.printStackTrace();	}
+			} catch (UnsupportedEncodingException e) {
+				System.out.println("ERROR1");e.printStackTrace();
+			}
 			try {
 				consumer.sign(hpost);
 			} catch (OAuthMessageSignerException e) {  
-				callback = true; deauthenticate(); postCallback.onErrorCallback(SOCIAL_NETWORK_ERROR); e.printStackTrace();
+				callback = true; deauthenticate(); postCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, e);
 			} catch (OAuthExpectationFailedException e) { 
-				callback = true; deauthenticate(); postCallback.onErrorCallback(SOCIAL_NETWORK_ERROR); e.printStackTrace();
+				callback = true; deauthenticate(); postCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, e);
 			} catch (OAuthCommunicationException e) { 
-				callback = true; deauthenticate(); postCallback.onErrorCallback(SOCIAL_NETWORK_ERROR); e.printStackTrace(); }
+				callback = true; deauthenticate(); postCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, e);
+			}
 
 			DefaultHttpClient client = new DefaultHttpClient();
 			HttpResponse resp = null;
 
 			try {
 				resp = client.execute(hpost);
-			} catch (ClientProtocolException e) { 
-				callback = true; postCallback.onErrorCallback(GENERAL_ERROR); e.printStackTrace();
-			} catch (IOException e) { 
-				callback = true; postCallback.onErrorCallback(GENERAL_ERROR); e.printStackTrace(); }
+			} catch (ClientProtocolException ex) { 
+				callback = true; postCallback.onErrorCallback(GENERAL_ERROR, ex);
+			} catch (IOException ex) { 
+				callback = true; postCallback.onErrorCallback(GENERAL_ERROR, ex);
+			}
 
 			try {
 				String result = EntityUtils.toString(resp.getEntity());
 				System.out.println("Post Result " + result);
-			} catch (ParseException e) { postCallback.onErrorCallback(GENERAL_ERROR); e.printStackTrace();
-			} catch (IOException e) { postCallback.onErrorCallback(GENERAL_ERROR); e.printStackTrace(); }
+			} catch (ParseException exc) {
+				postCallback.onErrorCallback(GENERAL_ERROR, exc);
+			} catch (IOException exc) {
+				postCallback.onErrorCallback(GENERAL_ERROR, exc);
+			}
+			
 			if(callback == false)
 				postCallback.onPostCallback(ACTION_SUCCESSFUL);
 		}
@@ -520,20 +528,20 @@ public class TheTumblr extends SocialNetwork {
 		public abstract void onLoginCallback(String result);
 		public void onPostCallback(String result) {};
 		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
-		public abstract void onErrorCallback(String error); 
+		public abstract void onErrorCallback(String error, Exception e); 
 	}
 
 	public static abstract class TheTumblrPostCallback implements SocialBaseCallback {
 		public void onLoginCallback(String result) {};
 		public abstract void onPostCallback(String result);
 		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
-		public abstract void onErrorCallback(String error);
+		public abstract void onErrorCallback(String error, Exception e);
 	}
 
 	public static abstract class TheTumblrFriendListCallback implements SocialBaseCallback {
 		public void onLoginCallback(String result) {};
 		public void onPostCallback(String result) {};
 		public abstract void onFriendsListCallback(String result, ArrayList<SocialFriend> list);
-		public abstract void onErrorCallback(String error);
+		public abstract void onErrorCallback(String error, Exception e);
 	}
 }

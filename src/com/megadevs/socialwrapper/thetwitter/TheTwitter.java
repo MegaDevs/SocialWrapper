@@ -81,7 +81,7 @@ public class TheTwitter extends SocialNetwork {
 	 * @param secret
 	 * @param key
 	 */
-	public void setConsumerSecretAndKey(String secret, String key) {
+	private void setConsumerSecretAndKey(String secret, String key) {
 		System.out.println("setConsumerSecretAndKey");
 		consumerSecret = secret;
 		consumerKey = key;
@@ -225,7 +225,7 @@ public class TheTwitter extends SocialNetwork {
 		removeAccessToken();
 	}
 
-	public void selfPost(final String msg, SocialBaseCallback s) throws InvalidAuthenticationException {
+	public void selfPost(final String msg, SocialBaseCallback s) {
 		System.out.println("selfPost");
 
 		postCallback = (TheTwitterPostCallback) s;
@@ -268,7 +268,6 @@ public class TheTwitter extends SocialNetwork {
 						removeAccessToken();
 						System.out.println("5");
 						
-						//Toast.makeText(mActivity, "Tweet could not be performed, try to reauthenticate", 1000);
 						postCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, e);
 						try {
 							throw new InvalidAuthenticationException("Tweet could not be performed, try to reauthenticate", null);
@@ -281,9 +280,7 @@ public class TheTwitter extends SocialNetwork {
 						twitter.updateStatus(msg);
 						System.out.println("6");						
 					} catch (TwitterException e) {
-						Toast.makeText(mActivity, "Check your tweet!! You can't post twice the same message!!", 1000);
 						postCallback.onErrorCallback(GENERAL_ERROR, e);
-						System.out.println("7");		
 						callBack = true;
 						e.printStackTrace();
 					}
@@ -299,7 +296,7 @@ public class TheTwitter extends SocialNetwork {
 
 	}
 
-	public void postToFriend(final String friendID, final String msg, SocialBaseCallback s) throws InvalidSocialRequestException {
+	public void postToFriend(final String friendID, final String msg, SocialBaseCallback s) {
 		System.out.println("postToFriend");
 		postCallback = (TheTwitterPostCallback) s;
 System.out.println("1");

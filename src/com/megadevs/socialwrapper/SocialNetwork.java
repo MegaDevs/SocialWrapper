@@ -87,4 +87,8 @@ public abstract class SocialNetwork {
 		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list);
 		public void onErrorCallback(String error, Exception e);
 	}
+	
+	protected void setActivity(Activity a) {
+		mActivity = a;
+	}
 }
