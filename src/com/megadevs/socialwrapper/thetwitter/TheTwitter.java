@@ -206,16 +206,11 @@ public class TheTwitter extends SocialNetwork {
 	public void authenticate(SocialBaseCallback r) {
 		System.out.println("authenticate");
 		loginCallback = (TheTwitterLoginCallback)r;
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					OAuthLogin();
-				} catch (InvalidAuthenticationException e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
+		try {
+			OAuthLogin();
+		} catch (InvalidAuthenticationException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -230,129 +225,108 @@ public class TheTwitter extends SocialNetwork {
 
 		postCallback = (TheTwitterPostCallback) s;
 
-		new Thread(new Runnable() {
+		Boolean callBack = false;
+		try {
+			try {
+				if(twitter.verifyCredentials() == null) {
+					System.out.println(" user nullo ritornato dalla verifica delle credenzionali");
 
-			@Override
-			public void run() {
-				Boolean callBack = false;
+				}
+			} catch (TwitterException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			}
+
+			if(twitter == null)
+				if(checkIstanceTwitter()) { 
+					twitter = twitterFactory.getInstance(accessToken);
+
+				}
+				else {
+					removeAccessToken();
+					postCallback.onPostCallback(SOCIAL_NETWORK_ERROR);
+					throw new InvalidAuthenticationException("Tweet could not be performed, try to reauthenticate", null);
+				}
+			try {
+				System.out.println(twitter.verifyCredentials().getId());
+			} catch (TwitterException e) {
+				removeAccessToken();
+				postCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, e);
 				try {
-					System.out.println("0");
-					try {
-						if(twitter.verifyCredentials() == null) {
-							System.out.println(" user nullo ritornato dalla verifica delle credenzionali");
-							System.out.println("1");
-							
-						}
-					} catch (TwitterException e2) {
-						// TODO Auto-generated catch block
-						e2.printStackTrace();
-					}
-
-					if(twitter == null)
-						if(checkIstanceTwitter()) { 
-							twitter = twitterFactory.getInstance(accessToken);
-							System.out.println("2");
-							
-						}
-						else {
-							removeAccessToken();
-							System.out.println("3");							
-							postCallback.onPostCallback(SOCIAL_NETWORK_ERROR);
-							throw new InvalidAuthenticationException("Tweet could not be performed, try to reauthenticate", null);
-						}
-					try {
-						System.out.println(twitter.verifyCredentials().getId());
-						System.out.println("4");						
-					} catch (TwitterException e) {
-						System.out.println("4.1");
-						removeAccessToken();
-						System.out.println("5");
-						
-						postCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, e);
-						try {
-							throw new InvalidAuthenticationException("Tweet could not be performed, try to reauthenticate", null);
-						} catch (InvalidAuthenticationException e1) {
-							e1.printStackTrace();
-						}
-					}
-
-					try {
-						twitter.updateStatus(msg);
-						System.out.println("6");						
-					} catch (TwitterException e) {
-						postCallback.onErrorCallback(GENERAL_ERROR, e);
-						callBack = true;
-						e.printStackTrace();
-					}
-					if(callBack == false) {
-						System.out.println("8");	
-						postCallback.onPostCallback(ACTION_SUCCESSFUL);
-					}
-				} catch (InvalidAuthenticationException e) {
-					e.printStackTrace();
+					throw new InvalidAuthenticationException("Tweet could not be performed, try to reauthenticate", null);
+				} catch (InvalidAuthenticationException e1) {
+					e1.printStackTrace();
 				}
 			}
-		}).start();
+
+			try {
+				twitter.updateStatus(msg);
+			} catch (TwitterException e) {
+				postCallback.onErrorCallback(GENERAL_ERROR, e);
+				callBack = true;
+				e.printStackTrace();
+			}
+			if(callBack == false) {
+				postCallback.onPostCallback(ACTION_SUCCESSFUL);
+			}
+		} catch (InvalidAuthenticationException e) {
+			e.printStackTrace();
+		}
 
 	}
 
 	public void postToFriend(final String friendID, final String msg, SocialBaseCallback s) {
 		System.out.println("postToFriend");
 		postCallback = (TheTwitterPostCallback) s;
-System.out.println("1");
-		new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				Boolean callBack = false;
-				System.out.println("2");
-					if(twitter == null)
-						if(checkIstanceTwitter())  {
-							twitter = twitterFactory.getInstance(accessToken);
-							System.out.println("3");
-						}
-						else { 
-							System.out.println("remove1");
-							removeAccessToken();
-							postCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, null);
-							//Toast.makeText(mActivity, "Check your tweet!! You can't post twice the same message!!", 1000);
-						}
-
-					try {
-						System.out.println(twitter.verifyCredentials().getId());
-						System.out.println("4");
-					} catch (TwitterException e) {
-						System.out.println("remove2");
-						removeAccessToken();
-						System.out.println("5");
-						//Toast.makeText(mActivity, "Tweet could not be performed, try to reauthenticate", 1000);
-						postCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, e);
-					}
-
-					/*
-					 * 401:Authentication credentials 
-					 * (https://dev.twitter.com/docs/auth) were missing or incorrect.
-					 * Ensure that you have set valid conumer key/secret, access token/secret, and the system clock in in sync.
-
-					 */
-					
-					try {
-						System.out.println("7");
-						System.out.println("@" + friendID + " " + msg);
-						twitter.updateStatus("@" + friendID + " " + msg);
-					} catch (TwitterException e) {
-						System.out.println(e);
-						System.out.println("remove3");
-						removeAccessToken();
-						//Toast.makeText(mActivity, "Tweet could not be performed, try to reauthenticate", 1000);
-						callBack = true;
-						postCallback.onErrorCallback(GENERAL_ERROR, e);
-					}
-					// check the status
-					if(callBack == false)
-						postCallback.onPostCallback(ACTION_SUCCESSFUL);	
+		System.out.println("1");
+		Boolean callBack = false;
+		System.out.println("2");
+		if(twitter == null)
+			if(checkIstanceTwitter())  {
+				twitter = twitterFactory.getInstance(accessToken);
+				System.out.println("3");
 			}
-		}).start();
+			else { 
+				System.out.println("remove1");
+				removeAccessToken();
+				postCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, null);
+				//Toast.makeText(mActivity, "Check your tweet!! You can't post twice the same message!!", 1000);
+			}
+
+		try {
+			System.out.println(twitter.verifyCredentials().getId());
+			System.out.println("4");
+		} catch (TwitterException e) {
+			System.out.println("remove2");
+			removeAccessToken();
+			System.out.println("5");
+			//Toast.makeText(mActivity, "Tweet could not be performed, try to reauthenticate", 1000);
+			postCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, e);
+		}
+
+		/*
+		 * 401:Authentication credentials 
+		 * (https://dev.twitter.com/docs/auth) were missing or incorrect.
+		 * Ensure that you have set valid conumer key/secret, access token/secret, and the system clock in in sync.
+
+		 */
+
+		try {
+			System.out.println("7");
+			System.out.println("@" + friendID + " " + msg);
+			twitter.updateStatus("@" + friendID + " " + msg);
+		} catch (TwitterException e) {
+			System.out.println(e);
+			System.out.println("remove3");
+			removeAccessToken();
+			//Toast.makeText(mActivity, "Tweet could not be performed, try to reauthenticate", 1000);
+			callBack = true;
+			postCallback.onErrorCallback(GENERAL_ERROR, e);
+		}
+		// check the status
+		if(callBack == false)
+			postCallback.onPostCallback(ACTION_SUCCESSFUL);	
+
 	}
 
 	@Override
@@ -361,54 +335,49 @@ System.out.println("1");
 
 		friendslistCallback = (TheTwitterFriendListCallback) s;
 
-		new Thread(new Runnable() {
+		ArrayList<SocialFriend> friendList = new ArrayList<SocialFriend>();
 
-			@Override
-			public void run() {
-				ArrayList<SocialFriend> friendList = new ArrayList<SocialFriend>();
+		try {
 
-				try {
-
-					if(twitter == null) {
-						System.out.println("twitter == null");
-						if(checkIstanceTwitter())
-							twitter = twitterFactory.getInstance(accessToken);
-						else {
-							System.out.println("removeAccessToken()");
-							removeAccessToken();
-							friendslistCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, null);
-							throw new InvalidSocialRequestException("Tweet could not be performed, try to reauthenticate", null);
-						}
-					}
-					long cursor = -1;
-					IDs ids;
-					try {
-						do {
-							ids = twitter.getFollowersIDs(cursor);
-							for (long id : ids.getIDs()) {
-								friendList.add(
-										new SocialFriend(
-												Long.toString(twitter.showUser(id).getId()),
-												twitter.showUser(id).getName(),
-												twitter.showUser(id).getProfileImageURL().toString()));
-							}
-						} while ((cursor = ids.getNextCursor()) != 0);
-						friendslistCallback.onFriendsListCallback(ACTION_SUCCESSFUL, friendList);
-					} catch (TwitterException e) {
-						removeAccessToken();
-						Toast.makeText(mActivity, "Tweet could not be performed, try to reauthenticate", 1000);
-						friendslistCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, null);
-						try {
-							throw new InvalidSocialRequestException("Could not retrive the friends list, try to reauthenticate", e);
-						} catch (InvalidSocialRequestException e1) {
-							e1.printStackTrace();
-						}
-					}
-				} catch (InvalidSocialRequestException e) {
-					e.printStackTrace();
+			if(twitter == null) {
+				System.out.println("twitter == null");
+				if(checkIstanceTwitter())
+					twitter = twitterFactory.getInstance(accessToken);
+				else {
+					System.out.println("removeAccessToken()");
+					removeAccessToken();
+					friendslistCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, null);
+					throw new InvalidSocialRequestException("Tweet could not be performed, try to reauthenticate", null);
 				}
 			}
-		}).start();
+			long cursor = -1;
+			IDs ids;
+			try {
+				do {
+					ids = twitter.getFollowersIDs(cursor);
+					for (long id : ids.getIDs()) {
+						friendList.add(
+								new SocialFriend(
+										Long.toString(twitter.showUser(id).getId()),
+										twitter.showUser(id).getName(),
+										twitter.showUser(id).getProfileImageURL().toString()));
+					}
+				} while ((cursor = ids.getNextCursor()) != 0);
+				friendslistCallback.onFriendsListCallback(ACTION_SUCCESSFUL, friendList);
+			} catch (TwitterException e) {
+				removeAccessToken();
+				Toast.makeText(mActivity, "Tweet could not be performed, try to reauthenticate", 1000);
+				friendslistCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, null);
+				try {
+					throw new InvalidSocialRequestException("Could not retrive the friends list, try to reauthenticate", e);
+				} catch (InvalidSocialRequestException e1) {
+					e1.printStackTrace();
+				}
+			}
+		} catch (InvalidSocialRequestException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	///
