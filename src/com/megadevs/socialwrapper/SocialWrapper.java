@@ -96,4 +96,9 @@ public class SocialWrapper {
 		else
 			return socialNetworks.get(id);
 	}
+	
+	public void deauthenticateAll() {
+		for (SocialNetwork s : socialNetworks.values())
+			s.deauthenticate();
+	}
 }
