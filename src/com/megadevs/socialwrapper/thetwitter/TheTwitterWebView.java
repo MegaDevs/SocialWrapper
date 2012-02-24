@@ -19,6 +19,8 @@ import com.megadevs.socialwrapper.R;
 
 public class TheTwitterWebView extends Activity {	
 
+	private static String DENIED = "denied";
+
 	Twitter twitter;
 	RequestToken requestToken;
 
@@ -33,7 +35,7 @@ public class TheTwitterWebView extends Activity {
 		requestToken = (RequestToken) getIntent().getSerializableExtra("requestToken");
 
 		WebView webViewTest = (WebView)findViewById(R.id.webview);
-		System.out.println(" ====>>>>> " + getIntent().getExtras().getString("url"));
+		//System.out.println(" ====>>>>> " + getIntent().getExtras().getString("url"));
 		webViewTest.loadUrl(getIntent().getExtras().getString("url"));
 		//webSettings webSettings = webViewTest.getSettings();
 		//webSettings.setJavaScriptEnabled(false);
@@ -41,21 +43,25 @@ public class TheTwitterWebView extends Activity {
 
 			public boolean shouldOverrideUrlLoading(WebView view, String url) {
 				System.out.println(url);
-				if (url.startsWith("http")) {				
+				if (url.startsWith("http")) {
 					view.loadUrl(url);
 					return super.shouldOverrideUrlLoading(view, url);
 				} else {
+					String denied = Uri.parse(url).getQueryParameter(DENIED);
+					if(denied != null) {
+						//System.out.println("Denied!!!!!!!!!!!!!!!");
+						TheTwitter.deletePropers();
+					} else {
+						String verifier = Uri.parse(url).getQueryParameter(OAuth.OAUTH_VERIFIER);
 
-					String verifier = Uri.parse(url).getQueryParameter(OAuth.OAUTH_VERIFIER);
-		        
-					try {
-						AccessToken accessToken = twitter.getOAuthAccessToken(requestToken, verifier);
-						TheTwitter.getTwitter().setPropersAccessToken(accessToken);
-					} catch (TwitterException ex) {
-						Log.i(logTag, "Mah :-(", ex);
+						try {
+							AccessToken accessToken = twitter.getOAuthAccessToken(requestToken, verifier);
+							TheTwitter.getTwitter().setPropersAccessToken(accessToken);
+						} catch (TwitterException ex) {
+							Log.i(logTag, "Mah :-(", ex);
+						}
 					}
-		            
-		            TheTwitterWebView.this.finish();			
+					TheTwitterWebView.this.finish();			
 					return super.shouldOverrideUrlLoading(view, url);
 				}
 			}
@@ -74,26 +80,3 @@ public class TheTwitterWebView extends Activity {
 		}
 	}
 }
-/*
-@Override
-protected void onNewIntent(Intent intent) {
-	super.onNewIntent(intent);
-	
-	System.out.println("----------------00000000000----------------------------");
-	System.out.println("--------------00000000000000----------------");
-	System.out.println("---------------0000000000000-----------------------------");
-	System.out.println("----------------000000000---------------------------");
-	
-	if(intent.getScheme().equals("T4JOAuth")) {
-		Uri uri = intent.getData();
-		try {
-			String verifier = uri.getQueryParameter("oauth_verifier");
-			AccessToken accessToken = twitter.getOAuthAccessToken(requestToken, verifier);
-			TheTwitter.getTwitter().setPropersAccessToken(accessToken);
-			finish();			
-		} catch (TwitterException ex) {
-			Log.i(logTag, "Mah :-(", ex);
-		}
-	}
-}
-*/

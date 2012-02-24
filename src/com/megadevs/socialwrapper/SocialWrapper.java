@@ -28,7 +28,6 @@ public class SocialWrapper {
 	public static SocialWrapper getInstance() {
 		if(socialWrapper == null)
 			socialWrapper = new SocialWrapper();
-		
 		return socialWrapper;
 	}
 	

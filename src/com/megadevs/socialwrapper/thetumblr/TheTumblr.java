@@ -81,7 +81,7 @@ public class TheTumblr extends SocialNetwork {
 	private Boolean authenticated = false;
 
 	public TheTumblr(String id, Activity activity) {
-		System.out.println("Costruttore!!");
+		//System.out.println("Costruttore!!");
 		mActivity = activity;
 		mTumblr = this;
 		this.id = id;
@@ -92,7 +92,7 @@ public class TheTumblr extends SocialNetwork {
 	}
 
 	public void setParameters(String key, String secret, String callback) {
-		System.out.println("setParameters public");
+		//System.out.println("setParameters public tumblr");
 
 		CONSUMER_KEY = key;
 		CONSUMER_SECRET = secret;
@@ -112,10 +112,10 @@ public class TheTumblr extends SocialNetwork {
 				blogsName.add(connectionData.get("TUMBLR_BLOG" + i));
 
 		if(token == null && secret == null) {
-			System.out.println("Utente da autenticare");
+			//System.out.println("Utente da autenticare");
 			authenticated = false;
 		} else {
-			System.out.println("Utente gia' autenticato");
+			//System.out.println("Utente gia' autenticato");
 			consumer.setTokenWithSecret(token, secret);
 			authenticated = true;
 		}
@@ -138,12 +138,12 @@ public class TheTumblr extends SocialNetwork {
 	}
 
 	public static void setPropers(int resultCode, Intent data) {
-		System.out.println("I'm back");
+		//System.out.println("I'm back");
 		if(resultCode == 0) {
-			System.out.println("Male, ritorno non corretto");
+			//System.out.println("Male, ritorno non corretto");
 			verifier = "";
 		} else if(resultCode == 1) {
-			System.out.println("Bene, ritorno corretto");
+			//System.out.println("Bene, ritorno corretto");
 			verifier = data.getExtras().getString("verifier");
 		}
 	}
@@ -153,7 +153,7 @@ public class TheTumblr extends SocialNetwork {
 	{
 		try {
 			authURL = provider.retrieveRequestToken(consumer, OAUTH_CALLBACK_URL);
-			System.out.println("authURL " + authURL);
+			//System.out.println("authURL " + authURL);
 		} catch (OAuthMessageSignerException e) { e.printStackTrace();
 		} catch (OAuthNotAuthorizedException e) { e.printStackTrace();
 		} catch (OAuthExpectationFailedException e) { e.printStackTrace();
@@ -161,7 +161,7 @@ public class TheTumblr extends SocialNetwork {
 	}
 
 	public void deauthenticate() {
-		System.out.println("Reset del token, del verifier e dei blog, sia su app che su pref");
+		//System.out.println("Reset del token, del verifier e dei blog, sia su app che su pref");
 		token = verifier = secret = "";
 
 		blogsName = null;
@@ -172,10 +172,10 @@ public class TheTumblr extends SocialNetwork {
 	}
 
 	public void authenticate() {
-		System.out.println("authenticate()");
+		//System.out.println("authenticate()");
 		if(authenticated == false) {
 			if(verifier.equals("")) {
-				System.out.println("Devi prima recuperare il verifier per autenticare l'utente");
+				//System.out.println("Devi prima recuperare il verifier per autenticare l'utente");
 				setAuthURL();
 				newIntent = new Intent(mActivity, TheTumblerWebView.class);
 				Bundle b = new Bundle();
@@ -183,7 +183,7 @@ public class TheTumblr extends SocialNetwork {
 				newIntent.putExtras(b);
 				mActivity.startActivity(newIntent);
 			} else {
-				System.out.println("Recupero l'accessToken grazie al verifier");
+				//System.out.println("Recupero l'accessToken grazie al verifier");
 				try {
 					provider.retrieveAccessToken(consumer, verifier);
 				} catch (OAuthMessageSignerException e) { e.printStackTrace();
@@ -218,7 +218,7 @@ public class TheTumblr extends SocialNetwork {
 
 				try {
 					String result = EntityUtils.toString(resp.getEntity());
-					System.out.println("result " + result);
+					//System.out.println("result " + result);
 					blogsName = getBlogs(result);
 				} catch (ParseException e) { e.printStackTrace();
 				} catch (IOException e) { e.printStackTrace(); }
@@ -227,7 +227,7 @@ public class TheTumblr extends SocialNetwork {
 				loginCallback.onLoginCallback(SocialNetwork.ACTION_SUCCESSFUL);
 			}
 		} else {
-			System.out.println("Sei gia' autenticato");
+			//System.out.println("Sei gia' autenticato");
 			loginCallback.onLoginCallback(SocialNetwork.ACTION_SUCCESSFUL);
 		}
 	}
@@ -262,7 +262,7 @@ public class TheTumblr extends SocialNetwork {
 			try {
 				hpost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 			} catch (UnsupportedEncodingException e) {
-				System.out.println("ERROR1");e.printStackTrace();
+				//System.out.println("ERROR1");e.printStackTrace();
 			}
 			try {
 				consumer.sign(hpost);
@@ -287,7 +287,7 @@ public class TheTumblr extends SocialNetwork {
 
 			try {
 				String result = EntityUtils.toString(resp.getEntity());
-				System.out.println("Post Result " + result);
+				//System.out.println("Post Result " + result);
 			} catch (ParseException exc) {
 				postCallback.onErrorCallback(GENERAL_ERROR, exc);
 			} catch (IOException exc) {
@@ -303,7 +303,7 @@ public class TheTumblr extends SocialNetwork {
 
 		if(verifier.equals("")) {
 			authenticate();
-			System.out.println("cip e ciop fa ...");
+			//System.out.println("cip e ciop fa ...");
 
 		} else {
 			authenticate();
@@ -316,13 +316,16 @@ public class TheTumblr extends SocialNetwork {
 			nameValuePairs.add(new BasicNameValuePair("caption", "caption de sto cazzo"));
 			//nameValuePairs.add(new BasicNameValuePair("options", "mPostOptions"));
 
-			System.out.println("token = " + token);
-			System.out.println("secret = " + secret);
+			//System.out.println("token = " + token);
+			//System.out.println("secret = " + secret);
 			consumer.setTokenWithSecret(token, secret);
 
 			try {
 				hpost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-			} catch (UnsupportedEncodingException e) { System.out.println("ERROR1");e.printStackTrace();	}
+			} catch (UnsupportedEncodingException e) { 
+				//System.out.println("ERROR1");
+				e.printStackTrace();	
+			}
 			try {
 				consumer.sign(hpost);
 			} catch (OAuthMessageSignerException e) { e.printStackTrace();
@@ -339,7 +342,7 @@ public class TheTumblr extends SocialNetwork {
 
 			try {
 				String result = EntityUtils.toString(resp.getEntity());
-				System.out.println("Post Result " + result);
+				//System.out.println("Post Result " + result);
 			} catch (ParseException e) { e.printStackTrace();
 			} catch (IOException e) { e.printStackTrace(); }
 
@@ -353,9 +356,9 @@ public class TheTumblr extends SocialNetwork {
 			return null;
 		} else {
 			authenticate();
-			System.out.println("getFriendsList()");
+			//System.out.println("getFriendsList()");
 			HttpPost hpost = new HttpPost("http://api.tumblr.com/v2/blog/" + nickName + ".tumblr.com/followers");
-			System.out.println("hpost -> " + "http://api.tumblr.com/v2/blog/" + nickName + ".tumblr.com/followers");
+			//System.out.println("hpost -> " + "http://api.tumblr.com/v2/blog/" + nickName + ".tumblr.com/followers");
 
 			consumer.setTokenWithSecret(token, secret);
 			try {
@@ -374,7 +377,7 @@ public class TheTumblr extends SocialNetwork {
 
 			try {
 				String result = EntityUtils.toString(resp.getEntity());
-				System.out.println( "GetFriendList Result " + result);
+				//System.out.println( "GetFriendList Result " + result);
 				getFriends(result);
 			} catch (ParseException e) { e.printStackTrace();
 			} catch (IOException e) { e.printStackTrace(); }
@@ -383,7 +386,7 @@ public class TheTumblr extends SocialNetwork {
 			else {
 				String[] resultFriend = new String[numOfBlogs];
 				for(int i = 0; i < numOfFollowers; i++) {
-					System.out.println("usersInfo[i][0] " + usersInfo[i][0] + " usersInfo[i][1] " + usersInfo[i][1]);
+					//System.out.println("usersInfo[i][0] " + usersInfo[i][0] + " usersInfo[i][1] " + usersInfo[i][1]);
 				}
 				for(int i = 0; i < numOfFollowers; i++) {
 					resultFriend = usersInfo[i];
@@ -401,11 +404,11 @@ public class TheTumblr extends SocialNetwork {
 			JSONObject jMeta = jObj.getJSONObject("meta");
 			String jStatus = jMeta.getString("status"); 
 			String jMsg = jMeta.getString("msg");
-			System.out.println("status " + jStatus + " msg " + jMsg);
+			//System.out.println("status " + jStatus + " msg " + jMsg);
 
 			// Authentication Check!!
 			if(jStatus.equals("200")) {
-				System.out.println("uguale");
+				//System.out.println("uguale");
 				authenticated = true;
 			} else {
 				authenticated = false;
@@ -415,7 +418,7 @@ public class TheTumblr extends SocialNetwork {
 
 			JSONObject jResponse = jObj.getJSONObject("response");
 			numOfFollowers = jResponse.getInt("total_users");
-			System.out.println("numOfFollowers " + numOfFollowers);
+			//System.out.println("numOfFollowers " + numOfFollowers);
 
 			JSONArray jUsers = jResponse.getJSONArray("users");
 
@@ -427,7 +430,7 @@ public class TheTumblr extends SocialNetwork {
 				String jUserUrl = jUser.getString("url");
 				usersInfo[i][0] = jUserName;
 				usersInfo[i][1] = jUserUrl;
-				System.out.println("jUserName " + jUserName + " jUserUrl " + jUserUrl);
+				//System.out.println("jUserName " + jUserName + " jUserUrl " + jUserUrl);
 			}
 			return usersInfo;
 		} catch (JSONException e) { e.printStackTrace(); return null;}
@@ -441,7 +444,7 @@ public class TheTumblr extends SocialNetwork {
 			JSONObject jMeta = jObj.getJSONObject("meta");
 			String jStatus = jMeta.getString("status"); 
 			String jMsg = jMeta.getString("msg");
-			System.out.println("status " + jStatus + " msg " + jMsg);
+			//System.out.println("status " + jStatus + " msg " + jMsg);
 
 			// Authentication Check!!
 			if(jStatus.equals("200")) {
@@ -457,11 +460,11 @@ public class TheTumblr extends SocialNetwork {
 			JSONObject jUser = jResponse.getJSONObject("user");
 			nickName = jUser.getString("name");
 			connectionData.put("TUMBLR_NICKNAME", nickName);
-			System.out.println("Nick Name " + nickName);
+			//System.out.println("Nick Name " + nickName);
 			JSONArray jBlogS = jUser.getJSONArray("blogs");
 			numOfBlogs = jBlogS.length();
 			connectionData.put("TUMBLR_NUM_BLOGS", Integer.toString(numOfBlogs));
-			System.out.println("JBlogs num " + numOfBlogs);
+			//System.out.println("JBlogs num " + numOfBlogs);
 			ArrayList<String> blogsNameLocal = new ArrayList<String>();
 			String blogName = "";
 			for(int i = 0; i < jBlogS.length(); i++) {

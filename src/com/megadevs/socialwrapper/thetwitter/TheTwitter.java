@@ -31,7 +31,7 @@ public class TheTwitter extends SocialNetwork {
 	private String consumerKey = "";
 	private String consumerSecret = "";
 
-	private String callbackURL = "T4JOAuth://main";
+	private String callbackURL = ""; //"T4JOAuth://main";
 
 	private final String accessTokenKey = "accessTokenKey";
 	private final String accessTokenSecretKey = "accessTokenSecretKey";
@@ -61,7 +61,6 @@ public class TheTwitter extends SocialNetwork {
 		this.id = id;
 		this.mActivity = a;
 		myTwitter = this;
-
 		tag = "[SW-THETWITTER]";
 	}
 
@@ -82,7 +81,7 @@ public class TheTwitter extends SocialNetwork {
 	 * @param key
 	 */
 	private void setConsumerSecretAndKey(String secret, String key) {
-		System.out.println("setConsumerSecretAndKey");
+		//System.out.println("setConsumerSecretAndKey");
 		consumerSecret = secret;
 		consumerKey = key;
 		SocialSessionStore.restore(SocialWrapper.THETWITTER, this, mActivity);
@@ -107,7 +106,7 @@ public class TheTwitter extends SocialNetwork {
 	 * @return
 	 */
 	private AccessToken getAccessTokenInternal() {
-		System.out.println("getAccessTokenInternal");
+		//System.out.println("getAccessTokenInternal");
 		if (connectionData == null)
 			connectionData = new HashMap<String, String>();
 		String key = connectionData.get(accessTokenKey);
@@ -121,12 +120,12 @@ public class TheTwitter extends SocialNetwork {
 	} 
 
 	public static TheTwitter getTwitter() {
-		System.out.println("getTwitter");
+		//System.out.println("getTwitter");
 		return myTwitter;
 	}
 
 	private void setPropers() {
-		System.out.println("setPropers");
+		//System.out.println("setPropers");
 		connectionData.put(accessTokenKey, accessToken.getToken());
 		connectionData.put(accessTokenSecretKey, accessToken.getTokenSecret());
 		SocialSessionStore.save(SocialWrapper.THETWITTER, this, mActivity);
@@ -147,13 +146,13 @@ public class TheTwitter extends SocialNetwork {
 	}
 
 	public static void deletePropers() {
-		System.out.println("deletePropers");
+		//System.out.println("deletePropers");
 		//Log.i(tag, "elimino l'istanza di twitter che ho istanziato non autenticata");
 		twitter = null;
 	}
 
 	private void removeAccessToken() {
-		System.out.println("removeAccessToken");
+		//System.out.println("removeAccessToken");
 		connectionData.remove(accessTokenKey);
 		connectionData.remove(accessTokenSecretKey);
 		accessToken = null;
@@ -165,7 +164,7 @@ public class TheTwitter extends SocialNetwork {
 	 * @return
 	 */
 	private Boolean checkIstanceTwitter() {
-		System.out.println("checkIstanceTwitter");
+		//System.out.println("checkIstanceTwitter");
 		accessToken = getAccessTokenInternal();
 		if(accessToken == null)
 			return false;
@@ -174,21 +173,16 @@ public class TheTwitter extends SocialNetwork {
 	}
 
 	private void OAuthLogin() throws InvalidAuthenticationException {
-		System.out.println("OAuthLogin");
+		//System.out.println("OAuthLogin");
 		try {				
 			accessToken = getAccessTokenInternal();
 
 			if (accessToken != null) {
-				Log.i(tag, "accessToken già salvato, istanzio twitter");
 				twitter = twitterFactory.getInstance(accessToken);
-				Log.i(tag, "Effettuo il verifyCredentials");
-				System.out.println("verifyCredentials     " + twitter.verifyCredentials().getId());
 				loginCallback.onLoginCallback(SocialNetwork.ACTION_SUCCESSFUL);
 			} else {
-				Log.i(tag, "Effettuo il logIn via WebView");
 				twitter = twitterFactory.getInstance();
 				RequestToken requestToken = twitter.getOAuthRequestToken(callbackURL); // (CALLBACKURL);
-				System.out.println(" =====> " + requestToken.getAuthenticationURL());
 				Intent i = new Intent(mActivity.getApplicationContext(), TheTwitterWebView.class);
 				Bundle b = new Bundle();
 				b.putString("url", requestToken.getAuthenticationURL());
@@ -204,7 +198,7 @@ public class TheTwitter extends SocialNetwork {
 
 	@Override
 	public void authenticate(SocialBaseCallback r) {
-		System.out.println("authenticate");
+		//System.out.println("authenticate");
 		loginCallback = (TheTwitterLoginCallback)r;
 		try {
 			OAuthLogin();
@@ -215,13 +209,13 @@ public class TheTwitter extends SocialNetwork {
 
 	@Override
 	public void deauthenticate() {
-		System.out.println("deauthenticate");
+		//System.out.println("deauthenticate");
 		deletePropers();
 		removeAccessToken();
 	}
 
 	public void selfPost(final String msg, SocialBaseCallback s) {
-		System.out.println("selfPost");
+		//System.out.println("selfPost");
 
 		postCallback = (TheTwitterPostCallback) s;
 
@@ -233,6 +227,7 @@ public class TheTwitter extends SocialNetwork {
 
 				}
 			} catch (TwitterException e2) {
+				System.out.println("remove0");
 				// TODO Auto-generated catch block
 				e2.printStackTrace();
 			}
@@ -243,6 +238,7 @@ public class TheTwitter extends SocialNetwork {
 
 				}
 				else {
+					System.out.println("remove1");
 					removeAccessToken();
 					postCallback.onPostCallback(SOCIAL_NETWORK_ERROR);
 					throw new InvalidAuthenticationException("Tweet could not be performed, try to reauthenticate", null);
@@ -250,6 +246,7 @@ public class TheTwitter extends SocialNetwork {
 			try {
 				System.out.println(twitter.verifyCredentials().getId());
 			} catch (TwitterException e) {
+				System.out.println("remove2");
 				removeAccessToken();
 				postCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, e);
 				try {
@@ -276,7 +273,7 @@ public class TheTwitter extends SocialNetwork {
 	}
 
 	public void postToFriend(final String friendID, final String msg, SocialBaseCallback s) {
-		System.out.println("postToFriend");
+		//System.out.println("postToFriend");
 		postCallback = (TheTwitterPostCallback) s;
 		System.out.println("1");
 		Boolean callBack = false;
@@ -407,7 +404,7 @@ public class TheTwitter extends SocialNetwork {
 
 	@Override
 	public Vector<String[]> getConnectionData() {
-		System.out.println("getConnectionData");
+		//System.out.println("getConnectionData");
 		Vector<String[]> connList = new Vector<String[]>();
 		connList.add(new String[] {accessTokenKey, connectionData.get(accessTokenKey)});
 		connList.add(new String[] {accessTokenSecretKey, connectionData.get(accessTokenSecretKey)});
@@ -416,13 +413,13 @@ public class TheTwitter extends SocialNetwork {
 
 	@Override
 	protected void setConnectionData(Map<String, String> connectionData) {
-		System.out.println("setConnectionData");
+		//System.out.println("setConnectionData");
 		this.connectionData = connectionData;
 	}
 
 	@Override
 	public String getAccessToken() {
-		System.out.println("getAccessToken");
+		//System.out.println("getAccessToken");
 		if (accessToken != null)
 			return accessToken.getToken()+';'+accessToken.getTokenSecret();
 
@@ -431,7 +428,7 @@ public class TheTwitter extends SocialNetwork {
 
 	@Override
 	public boolean isAuthenticated() {
-		System.out.println("isAuthenticated");
+		//System.out.println("isAuthenticated");
 		if(accessToken != null) 
 			if (!accessToken.getToken().equals("") && (!accessToken.getTokenSecret().equals("")))
 				return true;
