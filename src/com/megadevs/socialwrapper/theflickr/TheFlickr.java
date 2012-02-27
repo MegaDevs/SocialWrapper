@@ -17,7 +17,6 @@ import com.gmail.yuyang226.flickr.FlickrException;
 import com.gmail.yuyang226.flickr.oauth.OAuth;
 import com.gmail.yuyang226.flickr.oauth.OAuthToken;
 import com.gmail.yuyang226.flickr.uploader.UploadMetaData;
-
 import com.megadevs.socialwrapper.SocialFriend;
 import com.megadevs.socialwrapper.SocialNetwork;
 import com.megadevs.socialwrapper.SocialSessionStore;
@@ -180,7 +179,9 @@ public class TheFlickr extends SocialNetwork {
 				if (message == null) message = "";
 				String result;
 				try {
-					result = f.getUploader().upload(message, image, new UploadMetaData());
+					UploadMetaData meta = new UploadMetaData();
+					meta.setTitle(message);
+					result = f.getUploader().upload("", image, meta);
 
 					// parsing response: should return a valid photoID
 					if (result.matches("[0-9]*")) 
