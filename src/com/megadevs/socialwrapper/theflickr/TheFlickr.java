@@ -181,7 +181,7 @@ public class TheFlickr extends SocialNetwork {
 				try {
 					UploadMetaData meta = new UploadMetaData();
 					meta.setTitle(message);
-					result = f.getUploader().upload("", image, meta);
+					result = f.getUploader().upload("Corso12 Photo", image, meta);
 
 					// parsing response: should return a valid photoID
 					if (result.matches("[0-9]*")) 
