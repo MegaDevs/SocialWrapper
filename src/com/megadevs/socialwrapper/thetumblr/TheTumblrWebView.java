@@ -11,7 +11,7 @@ import android.view.KeyEvent;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-public class TheTumblerWebView extends Activity {
+public class TheTumblrWebView extends Activity {
 
 	@Override
 	public void onCreate(Bundle savedInstance) {
@@ -36,7 +36,7 @@ public class TheTumblerWebView extends Activity {
 					TheTumblr.setPropers(1, i);
 					TheTumblr.getTumblr().authenticate();
 
-					TheTumblerWebView.this.finish();			
+					TheTumblrWebView.this.finish();			
 					return super.shouldOverrideUrlLoading(view, url);
 				}
 			}

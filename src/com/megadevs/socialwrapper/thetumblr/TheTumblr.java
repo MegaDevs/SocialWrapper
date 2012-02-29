@@ -30,6 +30,7 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Base64;
 
 import com.megadevs.socialwrapper.SocialFriend;
 import com.megadevs.socialwrapper.SocialNetwork;
@@ -60,6 +61,7 @@ public class TheTumblr extends SocialNetwork {
 	// static callback refs
 	private TheTumblrLoginCallback loginCallback;
 	private TheTumblrPostCallback postCallback;
+	private TheTumblrPostPictureCallback pictureCallback;
 
 	private static String authURL;
 
@@ -98,6 +100,9 @@ public class TheTumblr extends SocialNetwork {
 		CONSUMER_SECRET = secret;
 		OAUTH_CALLBACK_URL = callback;
 
+		consumer = new CommonsHttpOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
+		provider = new CommonsHttpOAuthProvider(REQUEST_URL, ACCESS_URL, AUTHORIZE_URL);
+		
 		SocialSessionStore.restore(SocialWrapper.THETUMBLR, this, mActivity);
 
 		token = connectionData.get("TUMBLR_OAUTH_TOKEN");
@@ -174,10 +179,10 @@ public class TheTumblr extends SocialNetwork {
 	public void authenticate() {
 		//System.out.println("authenticate()");
 		if(authenticated == false) {
-			if(verifier.equals("")) {
+			if(verifier == null) {
 				//System.out.println("Devi prima recuperare il verifier per autenticare l'utente");
 				setAuthURL();
-				newIntent = new Intent(mActivity, TheTumblerWebView.class);
+				newIntent = new Intent(mActivity, TheTumblrWebView.class);
 				Bundle b = new Bundle();
 				b.putString("url", authURL);
 				newIntent.putExtras(b);
@@ -299,8 +304,12 @@ public class TheTumblr extends SocialNetwork {
 		}
 	}
 
-	public void uploadImage(String blog) {
+	public void uploadImage(byte[] image, String blog, SocialBaseCallback s) {
 
+		pictureCallback = (TheTumblrPostPictureCallback) s;
+		
+		blog = blogsName.get(0);
+		
 		if(verifier.equals("")) {
 			authenticate();
 			//System.out.println("cip e ciop fa ...");
@@ -308,12 +317,15 @@ public class TheTumblr extends SocialNetwork {
 		} else {
 			authenticate();
 			HttpPost hpost = new HttpPost("http://api.tumblr.com/v2/blog/" +  blog + ".tumblr.com/post"); 
-
+			System.out.println("http://api.tumblr.com/v2/blog/" +  blog + ".tumblr.com/post");
+			
 			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
 
 			nameValuePairs.add(new BasicNameValuePair("type", "photo"));
 			//nameValuePairs.add(new BasicNameValuePair("source", new File("/sdcard/foto.jpg")));
 			nameValuePairs.add(new BasicNameValuePair("caption", "caption de sto cazzo"));
+//			nameValuePairs.add(new BasicNameValuePair("data", Base64.encodeToString(image, Base64.DEFAULT)));
+			nameValuePairs.add(new BasicNameValuePair("source", "http://i0.kym-cdn.com/entries/icons/original/000/000/005/pedobear.jpg"));
 			//nameValuePairs.add(new BasicNameValuePair("options", "mPostOptions"));
 
 			//System.out.println("token = " + token);
@@ -342,7 +354,7 @@ public class TheTumblr extends SocialNetwork {
 
 			try {
 				String result = EntityUtils.toString(resp.getEntity());
-				//System.out.println("Post Result " + result);
+				System.out.println("Post Result " + result);
 			} catch (ParseException e) { e.printStackTrace();
 			} catch (IOException e) { e.printStackTrace(); }
 
@@ -530,6 +542,7 @@ public class TheTumblr extends SocialNetwork {
 	public static abstract class TheTumblrLoginCallback implements SocialBaseCallback {
 		public abstract void onLoginCallback(String result);
 		public void onPostCallback(String result) {};
+		public void onPostPictureCallback(String result) {};
 		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
 		public abstract void onErrorCallback(String error, Exception e); 
 	}
@@ -537,6 +550,7 @@ public class TheTumblr extends SocialNetwork {
 	public static abstract class TheTumblrPostCallback implements SocialBaseCallback {
 		public void onLoginCallback(String result) {};
 		public abstract void onPostCallback(String result);
+		public void onPostPictureCallback(String result) {};
 		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
 		public abstract void onErrorCallback(String error, Exception e);
 	}
@@ -544,7 +558,16 @@ public class TheTumblr extends SocialNetwork {
 	public static abstract class TheTumblrFriendListCallback implements SocialBaseCallback {
 		public void onLoginCallback(String result) {};
 		public void onPostCallback(String result) {};
+		public void onPostPictureCallback(String result) {};
 		public abstract void onFriendsListCallback(String result, ArrayList<SocialFriend> list);
+		public abstract void onErrorCallback(String error, Exception e);
+	}
+	
+	public static abstract class TheTumblrPostPictureCallback implements SocialBaseCallback {
+		public void onLoginCallback(String result) {};
+		public void onPostCallback(String result) {};
+		public abstract void onPostPictureCallback(String result);
+		public void onFriendsListCallback(String result, ArrayList<SocialFriend> list) {};
 		public abstract void onErrorCallback(String error, Exception e);
 	}
 }
