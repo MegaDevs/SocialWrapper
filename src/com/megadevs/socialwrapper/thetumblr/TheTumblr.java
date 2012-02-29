@@ -53,8 +53,8 @@ public class TheTumblr extends SocialNetwork {
 	public static String	OAUTH_CALLBACK_HOST		= "";//"callback";
 	public static String	OAUTH_CALLBACK_URL		= "";//OAUTH_CALLBACK_SCHEME + "://" + OAUTH_CALLBACK_HOST;
 
-	private static CommonsHttpOAuthConsumer consumer = new CommonsHttpOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
-	private static CommonsHttpOAuthProvider provider = new CommonsHttpOAuthProvider(REQUEST_URL, ACCESS_URL, AUTHORIZE_URL);
+	private static CommonsHttpOAuthConsumer consumer; // = new CommonsHttpOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
+	private static CommonsHttpOAuthProvider provider; // = new CommonsHttpOAuthProvider(REQUEST_URL, ACCESS_URL, AUTHORIZE_URL);
 
 	private static TheTumblr mTumblr;
 
@@ -67,11 +67,11 @@ public class TheTumblr extends SocialNetwork {
 
 	private Activity mActivity;
 
-	private String token = "";
-	private String secret = "";
-	private static String verifier = "";
+	private String token;
+	private String secret;
+	private static String verifier;
 
-	private String nickName = "";
+	private String nickName;
 	private ArrayList<String> blogsName = null;
 	private Integer numOfBlogs = 0;
 
@@ -146,7 +146,7 @@ public class TheTumblr extends SocialNetwork {
 		//System.out.println("I'm back");
 		if(resultCode == 0) {
 			//System.out.println("Male, ritorno non corretto");
-			verifier = "";
+			verifier = null;
 		} else if(resultCode == 1) {
 			//System.out.println("Bene, ritorno corretto");
 			verifier = data.getExtras().getString("verifier");
@@ -167,7 +167,7 @@ public class TheTumblr extends SocialNetwork {
 
 	public void deauthenticate() {
 		//System.out.println("Reset del token, del verifier e dei blog, sia su app che su pref");
-		token = verifier = secret = "";
+		token = verifier = secret = null;
 
 		blogsName = null;
 		numOfBlogs = 0;
@@ -238,7 +238,7 @@ public class TheTumblr extends SocialNetwork {
 	}
 
 	public ArrayList<String> choiceBlog() {
-		if(verifier.equals("")) {
+		if(verifier == null) {
 			authenticate();
 			return null;
 		} else {
@@ -252,9 +252,9 @@ public class TheTumblr extends SocialNetwork {
 		postCallback = (TheTumblrPostCallback) s;
 		boolean callback = false;
 		authenticate();
-		if(!verifier.equals("")) {
-			if(blog.equals("")) 
-				blog = blogsName.get(0); // In the first position there is the default blog
+		if(verifier != null) {
+			//if(blog.equals("")) 
+			blog = blogsName.get(0); // In the first position there is the default blog
 			HttpPost hpost = new HttpPost("http://api.tumblr.com/v2/blog/" +  blog + ".tumblr.com/post"); 
 
 			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
@@ -304,10 +304,10 @@ public class TheTumblr extends SocialNetwork {
 		}
 	}
 
-	public void uploadImage(byte[] image, String blog, SocialBaseCallback s) {
+	public void uploadImage(String urlImage, String blog, SocialBaseCallback s) {
 
 		pictureCallback = (TheTumblrPostPictureCallback) s;
-		
+		boolean callback = false;
 		blog = blogsName.get(0);
 		
 		if(verifier.equals("")) {
@@ -325,7 +325,7 @@ public class TheTumblr extends SocialNetwork {
 			//nameValuePairs.add(new BasicNameValuePair("source", new File("/sdcard/foto.jpg")));
 			nameValuePairs.add(new BasicNameValuePair("caption", "caption de sto cazzo"));
 //			nameValuePairs.add(new BasicNameValuePair("data", Base64.encodeToString(image, Base64.DEFAULT)));
-			nameValuePairs.add(new BasicNameValuePair("source", "http://i0.kym-cdn.com/entries/icons/original/000/000/005/pedobear.jpg"));
+			nameValuePairs.add(new BasicNameValuePair("source", urlImage));
 			//nameValuePairs.add(new BasicNameValuePair("options", "mPostOptions"));
 
 			//System.out.println("token = " + token);
@@ -340,26 +340,37 @@ public class TheTumblr extends SocialNetwork {
 			}
 			try {
 				consumer.sign(hpost);
-			} catch (OAuthMessageSignerException e) { e.printStackTrace();
-			} catch (OAuthExpectationFailedException e) { e.printStackTrace();
-			} catch (OAuthCommunicationException e) { e.printStackTrace(); }
+			} catch (OAuthMessageSignerException e) {  
+				callback = true; deauthenticate(); pictureCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, e);
+			} catch (OAuthExpectationFailedException e) { 
+				callback = true; deauthenticate(); pictureCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, e);
+			} catch (OAuthCommunicationException e) { 
+				callback = true; deauthenticate(); pictureCallback.onErrorCallback(SOCIAL_NETWORK_ERROR, e);
+			}
 
 			DefaultHttpClient client = new DefaultHttpClient();
 			HttpResponse resp = null;
 
 			try {
 				resp = client.execute(hpost);
-			} catch (ClientProtocolException e) { e.printStackTrace();
-			} catch (IOException e) { e.printStackTrace(); }
+			} catch (ClientProtocolException ex) { 
+				callback = true; pictureCallback.onErrorCallback(GENERAL_ERROR, ex);
+			} catch (IOException ex) { 
+				callback = true; pictureCallback.onErrorCallback(GENERAL_ERROR, ex);
+			}
 
 			try {
 				String result = EntityUtils.toString(resp.getEntity());
-				System.out.println("Post Result " + result);
-			} catch (ParseException e) { e.printStackTrace();
-			} catch (IOException e) { e.printStackTrace(); }
-
+				//System.out.println("Post Result " + result);
+			} catch (ParseException exc) {
+				pictureCallback.onErrorCallback(GENERAL_ERROR, exc);
+			} catch (IOException exc) {
+				pictureCallback.onErrorCallback(GENERAL_ERROR, exc);
+			}
+			
+			if(callback == false)
+				pictureCallback.onPostCallback(ACTION_SUCCESSFUL);
 		}
-
 	}
 
 	public String[] getFriendsList() {
