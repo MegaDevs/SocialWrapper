@@ -205,6 +205,9 @@ public class TheFoursquare extends SocialNetwork {
 		b.putString("ll", ll);
 		b.putString("v", Utils.getCurrentDate());
 		
+		//CORSO12 SPECIFIC
+		b.putString("radius", "10000");
+		
 		// eventually a query name is passed, along with the geoposition
 		if (venue != null)
 			b.putString("query", venue);
