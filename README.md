@@ -64,4 +64,5 @@ Contacts
 eMail: info@megadevs.com
 
 [MegaDevs official website](http://megadevs.com/)
+
 [MegaDevs official blog](http://megazine.megadevs.com)
