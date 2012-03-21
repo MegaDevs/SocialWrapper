@@ -61,7 +61,7 @@ Another GitHub project called SocialWrapperTester will soon be uploaded. It cont
 Contacts
 --------
 
-eMail: info@megadevs.com
+e-mail: info@megadevs.com
 
 [MegaDevs official website](http://megadevs.com/)
 
