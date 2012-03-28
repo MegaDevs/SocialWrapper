@@ -51,7 +51,7 @@ Pay attention to this command
 
 	wrapper.setActivity(mContext)
 
-The setActivity() method must be called from within the activity which  contains the SocialWrapper instance. This is because some social networks, like Facebook and Foursquare, will use a custom Dialog UI that cannot be created without a valid Context.
+The setActivity() method must be called from within the activity containing the SocialWrapper instance. This is because some social networks, like Facebook and Foursquare, will use a custom Dialog UI that cannot be created without a valid Context.
 
 Extensive example
 -----------------
