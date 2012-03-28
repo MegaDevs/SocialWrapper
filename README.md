@@ -58,6 +58,11 @@ Extensive example
 
 Another GitHub project called SocialWrapperTester will soon be uploaded. It contains an activity which provides the code to test every single social network method available on this library.
 
+Future extensions
+-----------------
+
+We are considering the possibility of re-writing the whole library from scratch in order to remove all of the external dependencies.
+
 Credits
 -------
 
