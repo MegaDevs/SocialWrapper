@@ -58,6 +58,18 @@ Extensive example
 
 Another GitHub project called SocialWrapperTester will soon be uploaded. It contains an activity which provides the code to test every single social network method available on this library.
 
+Credits
+-------
+
+The SocialWrapper library wraps the following third party Android library projects:
+
+* [Facebook Android SDK](https://github.com/facebook/facebook-android-sdk)
+* [Twitter4J](http://twitter4j.org/en/index.html)
+* [Foursquare Android SDK](https://github.com/jiramot/foursquare-android-sdk)
+* [Flickrj-android](http://code.google.com/p/flickrj-android/)
+ 
+Big thanks to their authors. 
+
 Contacts
 --------
 
